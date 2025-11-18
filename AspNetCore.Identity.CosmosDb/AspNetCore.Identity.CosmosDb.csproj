@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net9.0</TargetFramework>
+		<TargetFramework>net10.0</TargetFramework>
 		<Version>9.0.1.2</Version>
 		<AssemblyVersion>9.0.1.2</AssemblyVersion>
 		<FileVersion>9.0.1.2</FileVersion>
@@ -32,19 +32,19 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.8" />
-        <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="9.0.8" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Cosmos" Version="9.0.8" />
-		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="9.0.8" />
-		<PackageReference Include="System.Text.Json" Version="9.0.8" />
+		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.0" />
+        <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="10.0.0" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Cosmos" Version="10.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.0" />
+		<PackageReference Include="System.Text.Json" Version="10.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<Content Include="B2C_BrandIcon_Black.png" />
 		<Content Include="_res\icons\B2C_BrandIcon_Black.png" />
 		<None Include="../README.md" Pack="true" PackagePath="\" />
-		<PackageReference Include="Duende.IdentityServer.EntityFramework.Storage" Version="7.2.4" />
-		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+		<PackageReference Include="Duende.IdentityServer.EntityFramework.Storage" Version="7.3.2" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
 	</ItemGroup>
 
 	<ItemGroup>
