@@ -236,7 +236,7 @@ Current local test configuration:
 
 ```json
 {
-  "CosmosDB": "AccountEndpoint=...;AccountKey=...;",
+  "ApplicationDbContextConnection": "AccountEndpoint=...;AccountKey=...;",
   "CosmosIdentityDbName": "localtests"
 }
 ```

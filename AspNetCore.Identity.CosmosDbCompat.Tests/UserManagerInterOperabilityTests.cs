@@ -28,7 +28,7 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9
         [ClassInitialize]
         public static void Initialize(TestContext context)
         {
-            connectionString = TestUtilities.GetKeyValue("CosmosDB");
+            connectionString = TestUtilities.GetKeyValue("ApplicationDbContextConnection");
             databaseName = $"{TestUtilities.GetKeyValue("CosmosIdentityDbName")}-compat-user-{Guid.NewGuid():N}";
             InitializeClass(connectionString, databaseName);
         }
