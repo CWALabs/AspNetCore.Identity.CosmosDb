@@ -1,0 +1,602 @@
+{
+  "settings": {
+    "components": {
+      "code": true,
+      "binaries": false
+    },
+    "targetId": "net10.0",
+    "targetDisplayName": ".NETCoreApp,Version=v10.0"
+  },
+  "analysisStartTime": "2026-04-01T10:48:04.1587891Z",
+  "analysisEndTime": "2026-04-01T10:48:08.9722996Z",
+  "privacyModeHelpUrl": "https://go.microsoft.com/fwlink/?linkid=2270980",
+  "stats": {
+    "summary": {
+      "projects": 3,
+      "issues": 3,
+      "incidents": 18,
+      "effort": 18
+    },
+    "charts": {
+      "severity": {
+        "Mandatory": 3,
+        "Optional": 0,
+        "Potential": 15,
+        "Information": 0
+      },
+      "category": {
+        "NuGet": 10,
+        "Project": 3,
+        "Api": 5
+      }
+    }
+  },
+  "projects": [
+    {
+      "path": "AspNetCore.Identity.CosmosDb\\AspNetCore.Identity.CosmosDb.csproj",
+      "startingProject": true,
+      "issues": 3,
+      "storyPoints": 10,
+      "properties": {
+        "appName": "AspNetCore.Identity.CosmosDb",
+        "projectKind": "ClassLibrary",
+        "frameworks": [
+          "net9.0"
+        ],
+        "languages": [
+          "C#"
+        ],
+        "tools": [
+          "MSBuild"
+        ],
+        "isSdkStyle": true,
+        "numberOfFiles": 23,
+        "numberOfCodeFiles": 21,
+        "linesTotal": 2920,
+        "linesOfCode": 2630,
+        "totalApiScanned": 2526,
+        "minLinesOfCodeToChange": 3,
+        "maxLinesOfCodeToChange": 3
+      },
+      "ruleInstances": [
+        {
+          "incidentId": "40aea1be-0299-4b49-a9bf-420282730f94",
+          "ruleId": "NuGet.0002",
+          "projectPath": "AspNetCore.Identity.CosmosDb\\AspNetCore.Identity.CosmosDb.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Microsoft.AspNetCore.Identity.EntityFrameworkCore, 9.0.8\n\nRecommendation:\n\nRemove Microsoft.AspNetCore.Identity.EntityFrameworkCore, and replace with new package Microsoft.AspNetCore.Identity.EntityFrameworkCore 10.0.5",
+              "protected": "Microsoft.AspNetCore.Identity.EntityFrameworkCore, 9.0.8\n\nRecommendation:\n\nRemove Microsoft.AspNetCore.Identity.EntityFrameworkCore, and replace with new package Microsoft.AspNetCore.Identity.EntityFrameworkCore 10.0.5"
+            },
+            "kind": "File",
+            "path": "AspNetCore.Identity.CosmosDb\\AspNetCore.Identity.CosmosDb.csproj",
+            "snippet": "Microsoft.AspNetCore.Identity.EntityFrameworkCore, 9.0.8\n\nRecommendation:\n\nRemove Microsoft.AspNetCore.Identity.EntityFrameworkCore, and replace with new package Microsoft.AspNetCore.Identity.EntityFrameworkCore 10.0.5",
+            "protectedSnippet": "Microsoft.AspNetCore.Identity.EntityFrameworkCore, 9.0.8\n\nRecommendation:\n\nRemove Microsoft.AspNetCore.Identity.EntityFrameworkCore, and replace with new package Microsoft.AspNetCore.Identity.EntityFrameworkCore 10.0.5",
+            "label": "Microsoft.AspNetCore.Identity.EntityFrameworkCore 9.0.8",
+            "properties": {
+              "PackageId": "Microsoft.AspNetCore.Identity.EntityFrameworkCore",
+              "PackageVersion": "9.0.8",
+              "PackageNewVersion": "10.0.5",
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "ee12f314-3a53-426c-8bb8-53277708124a",
+          "ruleId": "NuGet.0002",
+          "projectPath": "AspNetCore.Identity.CosmosDb\\AspNetCore.Identity.CosmosDb.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Microsoft.AspNetCore.Identity.UI, 9.0.8\n\nRecommendation:\n\nRemove Microsoft.AspNetCore.Identity.UI, and replace with new package Microsoft.AspNetCore.Identity.UI 10.0.5",
+              "protected": "Microsoft.AspNetCore.Identity.UI, 9.0.8\n\nRecommendation:\n\nRemove Microsoft.AspNetCore.Identity.UI, and replace with new package Microsoft.AspNetCore.Identity.UI 10.0.5"
+            },
+            "kind": "File",
+            "path": "AspNetCore.Identity.CosmosDb\\AspNetCore.Identity.CosmosDb.csproj",
+            "snippet": "Microsoft.AspNetCore.Identity.UI, 9.0.8\n\nRecommendation:\n\nRemove Microsoft.AspNetCore.Identity.UI, and replace with new package Microsoft.AspNetCore.Identity.UI 10.0.5",
+            "protectedSnippet": "Microsoft.AspNetCore.Identity.UI, 9.0.8\n\nRecommendation:\n\nRemove Microsoft.AspNetCore.Identity.UI, and replace with new package Microsoft.AspNetCore.Identity.UI 10.0.5",
+            "label": "Microsoft.AspNetCore.Identity.UI 9.0.8",
+            "properties": {
+              "PackageId": "Microsoft.AspNetCore.Identity.UI",
+              "PackageVersion": "9.0.8",
+              "PackageNewVersion": "10.0.5",
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "afe53913-c5a6-44c7-9742-ec3cbd8c1975",
+          "ruleId": "NuGet.0002",
+          "projectPath": "AspNetCore.Identity.CosmosDb\\AspNetCore.Identity.CosmosDb.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Microsoft.EntityFrameworkCore.Cosmos, 9.0.8\n\nRecommendation:\n\nRemove Microsoft.EntityFrameworkCore.Cosmos, and replace with new package Microsoft.EntityFrameworkCore.Cosmos 10.0.5",
+              "protected": "Microsoft.EntityFrameworkCore.Cosmos, 9.0.8\n\nRecommendation:\n\nRemove Microsoft.EntityFrameworkCore.Cosmos, and replace with new package Microsoft.EntityFrameworkCore.Cosmos 10.0.5"
+            },
+            "kind": "File",
+            "path": "AspNetCore.Identity.CosmosDb\\AspNetCore.Identity.CosmosDb.csproj",
+            "snippet": "Microsoft.EntityFrameworkCore.Cosmos, 9.0.8\n\nRecommendation:\n\nRemove Microsoft.EntityFrameworkCore.Cosmos, and replace with new package Microsoft.EntityFrameworkCore.Cosmos 10.0.5",
+            "protectedSnippet": "Microsoft.EntityFrameworkCore.Cosmos, 9.0.8\n\nRecommendation:\n\nRemove Microsoft.EntityFrameworkCore.Cosmos, and replace with new package Microsoft.EntityFrameworkCore.Cosmos 10.0.5",
+            "label": "Microsoft.EntityFrameworkCore.Cosmos 9.0.8",
+            "properties": {
+              "PackageId": "Microsoft.EntityFrameworkCore.Cosmos",
+              "PackageVersion": "9.0.8",
+              "PackageNewVersion": "10.0.5",
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "4f8d4d0e-365b-4a3f-bf8c-cf10d5b03177",
+          "ruleId": "NuGet.0002",
+          "projectPath": "AspNetCore.Identity.CosmosDb\\AspNetCore.Identity.CosmosDb.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Microsoft.Extensions.Caching.Memory, 9.0.8\n\nRecommendation:\n\nRemove Microsoft.Extensions.Caching.Memory, and replace with new package Microsoft.Extensions.Caching.Memory 10.0.5",
+              "protected": "Microsoft.Extensions.Caching.Memory, 9.0.8\n\nRecommendation:\n\nRemove Microsoft.Extensions.Caching.Memory, and replace with new package Microsoft.Extensions.Caching.Memory 10.0.5"
+            },
+            "kind": "File",
+            "path": "AspNetCore.Identity.CosmosDb\\AspNetCore.Identity.CosmosDb.csproj",
+            "snippet": "Microsoft.Extensions.Caching.Memory, 9.0.8\n\nRecommendation:\n\nRemove Microsoft.Extensions.Caching.Memory, and replace with new package Microsoft.Extensions.Caching.Memory 10.0.5",
+            "protectedSnippet": "Microsoft.Extensions.Caching.Memory, 9.0.8\n\nRecommendation:\n\nRemove Microsoft.Extensions.Caching.Memory, and replace with new package Microsoft.Extensions.Caching.Memory 10.0.5",
+            "label": "Microsoft.Extensions.Caching.Memory 9.0.8",
+            "properties": {
+              "PackageId": "Microsoft.Extensions.Caching.Memory",
+              "PackageVersion": "9.0.8",
+              "PackageNewVersion": "10.0.5",
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "64ab60df-cd70-4a9d-9c84-89954b402a5a",
+          "ruleId": "NuGet.0002",
+          "projectPath": "AspNetCore.Identity.CosmosDb\\AspNetCore.Identity.CosmosDb.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "System.Text.Json, 9.0.8\n\nRecommendation:\n\nRemove System.Text.Json, and replace with new package System.Text.Json 10.0.5",
+              "protected": "System.Text.Json, 9.0.8\n\nRecommendation:\n\nRemove System.Text.Json, and replace with new package System.Text.Json 10.0.5"
+            },
+            "kind": "File",
+            "path": "AspNetCore.Identity.CosmosDb\\AspNetCore.Identity.CosmosDb.csproj",
+            "snippet": "System.Text.Json, 9.0.8\n\nRecommendation:\n\nRemove System.Text.Json, and replace with new package System.Text.Json 10.0.5",
+            "protectedSnippet": "System.Text.Json, 9.0.8\n\nRecommendation:\n\nRemove System.Text.Json, and replace with new package System.Text.Json 10.0.5",
+            "label": "System.Text.Json 9.0.8",
+            "properties": {
+              "PackageId": "System.Text.Json",
+              "PackageVersion": "9.0.8",
+              "PackageNewVersion": "10.0.5",
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "1bf5cd43-d4b9-451b-ab5e-3f1bfd1623ca",
+          "ruleId": "NuGet.0002",
+          "projectPath": "AspNetCore.Identity.CosmosDb\\AspNetCore.Identity.CosmosDb.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Newtonsoft.Json, 13.0.3\n\nRecommendation:\n\nRemove Newtonsoft.Json, and replace with new package Newtonsoft.Json 13.0.4",
+              "protected": "Newtonsoft.Json, 13.0.3\n\nRecommendation:\n\nRemove Newtonsoft.Json, and replace with new package Newtonsoft.Json 13.0.4"
+            },
+            "kind": "File",
+            "path": "AspNetCore.Identity.CosmosDb\\AspNetCore.Identity.CosmosDb.csproj",
+            "snippet": "Newtonsoft.Json, 13.0.3\n\nRecommendation:\n\nRemove Newtonsoft.Json, and replace with new package Newtonsoft.Json 13.0.4",
+            "protectedSnippet": "Newtonsoft.Json, 13.0.3\n\nRecommendation:\n\nRemove Newtonsoft.Json, and replace with new package Newtonsoft.Json 13.0.4",
+            "label": "Newtonsoft.Json 13.0.3",
+            "properties": {
+              "PackageId": "Newtonsoft.Json",
+              "PackageVersion": "13.0.3",
+              "PackageNewVersion": "13.0.4",
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "63490ff6-e2f6-4f7a-9914-1c63beb9187e",
+          "ruleId": "Project.0002",
+          "projectPath": "AspNetCore.Identity.CosmosDb\\AspNetCore.Identity.CosmosDb.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Current target framework: net9.0\nRecommended target framework: net10.0",
+              "protected": "Current target framework: net9.0\nRecommended target framework: net10.0"
+            },
+            "kind": "File",
+            "path": "AspNetCore.Identity.CosmosDb\\AspNetCore.Identity.CosmosDb.csproj",
+            "snippet": "Current target framework: net9.0\nRecommended target framework: net10.0",
+            "protectedSnippet": "Current target framework: net9.0\nRecommended target framework: net10.0",
+            "properties": {
+              "CurrentTargetFramework": "net9.0",
+              "RecommendedTargetFramework": "net10.0"
+            }
+          }
+        },
+        {
+          "incidentId": "21d8e3e8-fe9a-49ec-9fd6-4c266daaf8c1",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "AspNetCore.Identity.CosmosDb\\AspNetCore.Identity.CosmosDb.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "await Retry.Do(async () =\u003E await InternalAddClaimAsync(role, claim, cancellationToken), TimeSpan.FromSeconds(1)).WaitAsync(cancellationToken);",
+              "protected": "M:System.TimeSpan.FromSeconds(System.Int64)"
+            },
+            "kind": "File",
+            "path": "AspNetCore.Identity.CosmosDb\\Stores\\CosmosRoleStore.cs",
+            "snippet": "await Retry.Do(async () =\u003E await InternalAddClaimAsync(role, claim, cancellationToken), TimeSpan.FromSeconds(1)).WaitAsync(cancellationToken);",
+            "protectedSnippet": "M:System.TimeSpan.FromSeconds(System.Int64)",
+            "label": "M:System.TimeSpan.FromSeconds(System.Int64)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 297,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "3da0f41b-ff52-45f8-9f36-9ab93572f92e",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "AspNetCore.Identity.CosmosDb\\AspNetCore.Identity.CosmosDb.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "await Retry.Do(async () =\u003E await InternalAddClaimAsync(user, claim, cancellationToken), TimeSpan.FromSeconds(1));",
+              "protected": "M:System.TimeSpan.FromSeconds(System.Int64)"
+            },
+            "kind": "File",
+            "path": "AspNetCore.Identity.CosmosDb\\Stores\\CosmosUserStore.cs",
+            "snippet": "await Retry.Do(async () =\u003E await InternalAddClaimAsync(user, claim, cancellationToken), TimeSpan.FromSeconds(1));",
+            "protectedSnippet": "M:System.TimeSpan.FromSeconds(System.Int64)",
+            "label": "M:System.TimeSpan.FromSeconds(System.Int64)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 835,
+            "column": 16
+          }
+        },
+        {
+          "incidentId": "cd81ffc9-442d-4650-ae6d-1dec03a316ed",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "AspNetCore.Identity.CosmosDb\\AspNetCore.Identity.CosmosDb.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "return ServiceCollectionExtensions.AddCosmosIdentity\u003CTDbContext, TUser, TRole, TKey\u003E(services, setupAction, TimeSpan.FromMinutes(5), slidingExpiration: false);",
+              "protected": "M:System.TimeSpan.FromMinutes(System.Int64)"
+            },
+            "kind": "File",
+            "path": "AspNetCore.Identity.CosmosDb\\Extensions\\ServiceCollectionExtensions.cs",
+            "snippet": "return ServiceCollectionExtensions.AddCosmosIdentity\u003CTDbContext, TUser, TRole, TKey\u003E(services, setupAction, TimeSpan.FromMinutes(5), slidingExpiration: false);",
+            "protectedSnippet": "M:System.TimeSpan.FromMinutes(System.Int64)",
+            "label": "M:System.TimeSpan.FromMinutes(System.Int64)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 48,
+            "column": 12
+          }
+        }
+      ],
+      "features": []
+    },
+    {
+      "path": "AspNetCore.Identity.CosmosDbCompat.Tests\\AspNetCore.Identity.CosmosDbCompat.Tests.csproj",
+      "startingProject": true,
+      "issues": 3,
+      "storyPoints": 3,
+      "properties": {
+        "appName": "AspNetCore.Identity.CosmosDbCompat.Tests",
+        "projectKind": "DotNetCoreApp",
+        "frameworks": [
+          "net9.0"
+        ],
+        "languages": [
+          "C#"
+        ],
+        "tools": [
+          "MSBuild"
+        ],
+        "isSdkStyle": true,
+        "numberOfFiles": 7,
+        "numberOfCodeFiles": 5,
+        "linesTotal": 3613,
+        "linesOfCode": 1818,
+        "totalApiScanned": 2188,
+        "minLinesOfCodeToChange": 1,
+        "maxLinesOfCodeToChange": 1
+      },
+      "ruleInstances": [
+        {
+          "incidentId": "8f6df60c-fbe5-43f4-a87f-e5c9fc35ef03",
+          "ruleId": "NuGet.0002",
+          "projectPath": "AspNetCore.Identity.CosmosDbCompat.Tests\\AspNetCore.Identity.CosmosDbCompat.Tests.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Microsoft.Extensions.Configuration.UserSecrets, 9.0.8\n\nRecommendation:\n\nRemove Microsoft.Extensions.Configuration.UserSecrets, and replace with new package Microsoft.Extensions.Configuration.UserSecrets 10.0.5",
+              "protected": "Microsoft.Extensions.Configuration.UserSecrets, 9.0.8\n\nRecommendation:\n\nRemove Microsoft.Extensions.Configuration.UserSecrets, and replace with new package Microsoft.Extensions.Configuration.UserSecrets 10.0.5"
+            },
+            "kind": "File",
+            "path": "AspNetCore.Identity.CosmosDbCompat.Tests\\AspNetCore.Identity.CosmosDbCompat.Tests.csproj",
+            "snippet": "Microsoft.Extensions.Configuration.UserSecrets, 9.0.8\n\nRecommendation:\n\nRemove Microsoft.Extensions.Configuration.UserSecrets, and replace with new package Microsoft.Extensions.Configuration.UserSecrets 10.0.5",
+            "protectedSnippet": "Microsoft.Extensions.Configuration.UserSecrets, 9.0.8\n\nRecommendation:\n\nRemove Microsoft.Extensions.Configuration.UserSecrets, and replace with new package Microsoft.Extensions.Configuration.UserSecrets 10.0.5",
+            "label": "Microsoft.Extensions.Configuration.UserSecrets 9.0.8",
+            "properties": {
+              "PackageId": "Microsoft.Extensions.Configuration.UserSecrets",
+              "PackageVersion": "9.0.8",
+              "PackageNewVersion": "10.0.5",
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "59e5ef38-53e3-4d91-b6fb-e55edb39b00e",
+          "ruleId": "Project.0002",
+          "projectPath": "AspNetCore.Identity.CosmosDbCompat.Tests\\AspNetCore.Identity.CosmosDbCompat.Tests.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Current target framework: net9.0\nRecommended target framework: net10.0",
+              "protected": "Current target framework: net9.0\nRecommended target framework: net10.0"
+            },
+            "kind": "File",
+            "path": "AspNetCore.Identity.CosmosDbCompat.Tests\\AspNetCore.Identity.CosmosDbCompat.Tests.csproj",
+            "snippet": "Current target framework: net9.0\nRecommended target framework: net10.0",
+            "protectedSnippet": "Current target framework: net9.0\nRecommended target framework: net10.0",
+            "properties": {
+              "CurrentTargetFramework": "net9.0",
+              "RecommendedTargetFramework": "net10.0"
+            }
+          }
+        },
+        {
+          "incidentId": "608817f8-c4cf-41a0-ab99-73bd6dd69ece",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "AspNetCore.Identity.CosmosDbCompat.Tests\\AspNetCore.Identity.CosmosDbCompat.Tests.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "return Retry.Do(() =\u003E builder.Build(), TimeSpan.FromSeconds(1));",
+              "protected": "M:System.TimeSpan.FromSeconds(System.Int64)"
+            },
+            "kind": "File",
+            "path": "AspNetCore.Identity.CosmosDbV9.Tests\\TestUtilities.cs",
+            "snippet": "return Retry.Do(() =\u003E builder.Build(), TimeSpan.FromSeconds(1));",
+            "protectedSnippet": "M:System.TimeSpan.FromSeconds(System.Int64)",
+            "label": "M:System.TimeSpan.FromSeconds(System.Int64)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 47,
+            "column": 12
+          }
+        }
+      ],
+      "features": []
+    },
+    {
+      "path": "AspNetCore.Identity.CosmosDbV9.Tests\\AspNetCore.Identity.CosmosDbV9.Tests.csproj",
+      "startingProject": true,
+      "issues": 3,
+      "storyPoints": 5,
+      "properties": {
+        "appName": "AspNetCore.Identity.CosmosDbV9.Tests",
+        "projectKind": "DotNetCoreApp",
+        "frameworks": [
+          "net9.0"
+        ],
+        "languages": [
+          "C#"
+        ],
+        "tools": [
+          "MSBuild"
+        ],
+        "isSdkStyle": true,
+        "numberOfFiles": 11,
+        "numberOfCodeFiles": 9,
+        "linesTotal": 4809,
+        "linesOfCode": 3014,
+        "totalApiScanned": 3745,
+        "minLinesOfCodeToChange": 1,
+        "maxLinesOfCodeToChange": 1
+      },
+      "ruleInstances": [
+        {
+          "incidentId": "6b8215be-f8cd-4486-8c0d-c12e80131369",
+          "ruleId": "NuGet.0002",
+          "projectPath": "AspNetCore.Identity.CosmosDbV9.Tests\\AspNetCore.Identity.CosmosDbV9.Tests.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Microsoft.Extensions.Caching.Memory, 9.0.8\n\nRecommendation:\n\nRemove Microsoft.Extensions.Caching.Memory, and replace with new package Microsoft.Extensions.Caching.Memory 10.0.5",
+              "protected": "Microsoft.Extensions.Caching.Memory, 9.0.8\n\nRecommendation:\n\nRemove Microsoft.Extensions.Caching.Memory, and replace with new package Microsoft.Extensions.Caching.Memory 10.0.5"
+            },
+            "kind": "File",
+            "path": "AspNetCore.Identity.CosmosDbV9.Tests\\AspNetCore.Identity.CosmosDbV9.Tests.csproj",
+            "snippet": "Microsoft.Extensions.Caching.Memory, 9.0.8\n\nRecommendation:\n\nRemove Microsoft.Extensions.Caching.Memory, and replace with new package Microsoft.Extensions.Caching.Memory 10.0.5",
+            "protectedSnippet": "Microsoft.Extensions.Caching.Memory, 9.0.8\n\nRecommendation:\n\nRemove Microsoft.Extensions.Caching.Memory, and replace with new package Microsoft.Extensions.Caching.Memory 10.0.5",
+            "label": "Microsoft.Extensions.Caching.Memory 9.0.8",
+            "properties": {
+              "PackageId": "Microsoft.Extensions.Caching.Memory",
+              "PackageVersion": "9.0.8",
+              "PackageNewVersion": "10.0.5",
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "5cf23e56-155d-4824-986d-609cca760dc8",
+          "ruleId": "NuGet.0002",
+          "projectPath": "AspNetCore.Identity.CosmosDbV9.Tests\\AspNetCore.Identity.CosmosDbV9.Tests.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Microsoft.Extensions.Configuration.UserSecrets, 9.0.8\n\nRecommendation:\n\nRemove Microsoft.Extensions.Configuration.UserSecrets, and replace with new package Microsoft.Extensions.Configuration.UserSecrets 10.0.5",
+              "protected": "Microsoft.Extensions.Configuration.UserSecrets, 9.0.8\n\nRecommendation:\n\nRemove Microsoft.Extensions.Configuration.UserSecrets, and replace with new package Microsoft.Extensions.Configuration.UserSecrets 10.0.5"
+            },
+            "kind": "File",
+            "path": "AspNetCore.Identity.CosmosDbV9.Tests\\AspNetCore.Identity.CosmosDbV9.Tests.csproj",
+            "snippet": "Microsoft.Extensions.Configuration.UserSecrets, 9.0.8\n\nRecommendation:\n\nRemove Microsoft.Extensions.Configuration.UserSecrets, and replace with new package Microsoft.Extensions.Configuration.UserSecrets 10.0.5",
+            "protectedSnippet": "Microsoft.Extensions.Configuration.UserSecrets, 9.0.8\n\nRecommendation:\n\nRemove Microsoft.Extensions.Configuration.UserSecrets, and replace with new package Microsoft.Extensions.Configuration.UserSecrets 10.0.5",
+            "label": "Microsoft.Extensions.Configuration.UserSecrets 9.0.8",
+            "properties": {
+              "PackageId": "Microsoft.Extensions.Configuration.UserSecrets",
+              "PackageVersion": "9.0.8",
+              "PackageNewVersion": "10.0.5",
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "2de62b47-e990-4b15-b900-215004c9453c",
+          "ruleId": "NuGet.0002",
+          "projectPath": "AspNetCore.Identity.CosmosDbV9.Tests\\AspNetCore.Identity.CosmosDbV9.Tests.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "System.Text.Json, 9.0.8\n\nRecommendation:\n\nRemove System.Text.Json, and replace with new package System.Text.Json 10.0.5",
+              "protected": "System.Text.Json, 9.0.8\n\nRecommendation:\n\nRemove System.Text.Json, and replace with new package System.Text.Json 10.0.5"
+            },
+            "kind": "File",
+            "path": "AspNetCore.Identity.CosmosDbV9.Tests\\AspNetCore.Identity.CosmosDbV9.Tests.csproj",
+            "snippet": "System.Text.Json, 9.0.8\n\nRecommendation:\n\nRemove System.Text.Json, and replace with new package System.Text.Json 10.0.5",
+            "protectedSnippet": "System.Text.Json, 9.0.8\n\nRecommendation:\n\nRemove System.Text.Json, and replace with new package System.Text.Json 10.0.5",
+            "label": "System.Text.Json 9.0.8",
+            "properties": {
+              "PackageId": "System.Text.Json",
+              "PackageVersion": "9.0.8",
+              "PackageNewVersion": "10.0.5",
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "de8df0be-594b-47a4-8ba4-5aa16ba237af",
+          "ruleId": "Project.0002",
+          "projectPath": "AspNetCore.Identity.CosmosDbV9.Tests\\AspNetCore.Identity.CosmosDbV9.Tests.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Current target framework: net9.0\nRecommended target framework: net10.0",
+              "protected": "Current target framework: net9.0\nRecommended target framework: net10.0"
+            },
+            "kind": "File",
+            "path": "AspNetCore.Identity.CosmosDbV9.Tests\\AspNetCore.Identity.CosmosDbV9.Tests.csproj",
+            "snippet": "Current target framework: net9.0\nRecommended target framework: net10.0",
+            "protectedSnippet": "Current target framework: net9.0\nRecommended target framework: net10.0",
+            "properties": {
+              "CurrentTargetFramework": "net9.0",
+              "RecommendedTargetFramework": "net10.0"
+            }
+          }
+        },
+        {
+          "incidentId": "a61126ca-6432-4fa1-a092-7b7130971249",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "AspNetCore.Identity.CosmosDbV9.Tests\\AspNetCore.Identity.CosmosDbV9.Tests.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "return Retry.Do(() =\u003E builder.Build(), TimeSpan.FromSeconds(1));",
+              "protected": "M:System.TimeSpan.FromSeconds(System.Int64)"
+            },
+            "kind": "File",
+            "path": "AspNetCore.Identity.CosmosDbV9.Tests\\TestUtilities.cs",
+            "snippet": "return Retry.Do(() =\u003E builder.Build(), TimeSpan.FromSeconds(1));",
+            "protectedSnippet": "M:System.TimeSpan.FromSeconds(System.Int64)",
+            "label": "M:System.TimeSpan.FromSeconds(System.Int64)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 47,
+            "column": 12
+          }
+        }
+      ],
+      "features": []
+    }
+  ],
+  "rules": {
+    "NuGet.0002": {
+      "id": "NuGet.0002",
+      "isFeature": false,
+      "description": "NuGet package upgrade is recommended for selected target framework.\n\nStandard .NET packages are recommended to have versions matching version of .NET that project targets.\n\nSome other packages also are known to work better for selected target frameworks.",
+      "label": "NuGet package upgrade is recommended",
+      "severity": "Potential",
+      "effort": 1,
+      "links": [
+        {
+          "url": "https://go.microsoft.com/fwlink/?linkid=2262530",
+          "isCustom": false
+        }
+      ]
+    },
+    "Project.0002": {
+      "id": "Project.0002",
+      "isFeature": false,
+      "description": "Project\u0027s target framework(s) needs to be changed to the new target framework that you selected for this upgrade.\n\nDuring upgrade target framework will be adjusted to corresponding platform when applicable. In some cases project would result in multiple target frameworks after the upgrade if it was using features that now have their own platforms in modern .NET frameworks (windows, iOS, Android etc).",
+      "label": "Project\u0027s target framework(s) needs to be changed",
+      "severity": "Mandatory",
+      "effort": 1,
+      "links": [
+        {
+          "title": "Overview of porting from .NET Framework to .NET",
+          "url": "https://go.microsoft.com/fwlink/?linkid=2265227",
+          "isCustom": false
+        },
+        {
+          "title": ".NET project SDKs",
+          "url": "https://go.microsoft.com/fwlink/?linkid=2265226",
+          "isCustom": false
+        }
+      ]
+    },
+    "Api.0002": {
+      "id": "Api.0002",
+      "isFeature": false,
+      "description": "API is source incompatible for selected .NET version: requires code changes to compile successfully when targeting a new version, such as removing obsolete APIs or changing method signatures.",
+      "label": "Source incompatible for selected .NET version",
+      "severity": "Potential",
+      "effort": 1,
+      "links": [
+        {
+          "title": "Breaking changes in .NET",
+          "url": "https://go.microsoft.com/fwlink/?linkid=2262679",
+          "isCustom": false
+        }
+      ]
+    }
+  }
+}

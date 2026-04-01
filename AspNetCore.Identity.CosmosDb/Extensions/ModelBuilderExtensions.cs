@@ -19,6 +19,7 @@ namespace AspNetCore.Identity.CosmosDb.Extensions
             builder.ApplyConfiguration(new UserClaimEntityTypeConfiguration<TKey> { });
             builder.ApplyConfiguration(new UserLoginEntityTypeConfiguration<TKey>(maxKeyLength) { });
             builder.ApplyConfiguration(new UserTokensEntityTypeConfiguration<TKey>(maxKeyLength) { });
+            builder.ApplyConfiguration(new UserPasskeyEntityTypeConfiguration<TKey> { });
             // The following may required a license for production.
             // See: https://modlogix.com/blog/identityserver4-alternatives-best-options-and-the-near-future-of-identityserver/
             builder.ApplyConfiguration(new DeviceFlowCodesEntityTypeConfiguration { });

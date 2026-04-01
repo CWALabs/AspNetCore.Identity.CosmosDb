@@ -1,38 +1,52 @@
 ---
 name: Bug report
-about: Create a report to help us improve
+about: Report a defect in the Cosmos Identity provider
 title: ''
-labels: ''
+labels: bug
 assignees: ''
 
 ---
 
-**Describe the bug**
-A clear and concise description of what the bug is.
+## Describe the bug
 
-**To Reproduce**
-Steps to reproduce the behavior:
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
+A clear and concise description of the problem.
 
-**Expected behavior**
+## Package version
+
+Which version of `AspNetCore.Identity.CosmosDb` are you using?
+
+## Runtime details
+
+- Target framework:
+- ASP.NET Core version:
+- EF Core Cosmos provider version:
+- Azure Cosmos DB account type:
+
+## To reproduce
+
+Steps, code, or configuration needed to reproduce the issue.
+
+## Expected behavior
+
 A clear and concise description of what you expected to happen.
 
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
+## Actual behavior
 
-**Desktop (please complete the following information):**
- - OS: [e.g. iOS]
- - Browser [e.g. chrome, safari]
- - Version [e.g. 22]
+What actually happened, including exception messages or incorrect results.
 
-**Smartphone (please complete the following information):**
- - Device: [e.g. iPhone6]
- - OS: [e.g. iOS8.1]
- - Browser [e.g. stock browser, safari]
- - Version [e.g. 22]
+## Relevant configuration
 
-**Additional context**
-Add any other context about the problem here.
+Include any relevant details such as:
+
+- `AddCosmosIdentity(...)` registration
+- `UseCosmos(...)` setup
+- Whether backward compatibility mode is enabled
+- Whether passkeys are involved
+
+## Minimal repro
+
+If possible, provide a minimal code sample or repository that reproduces the issue.
+
+## Additional context
+
+Anything else that would help diagnose the problem.

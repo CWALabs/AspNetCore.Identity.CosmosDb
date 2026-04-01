@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <LangVersion>latest</LangVersion>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
@@ -14,16 +14,11 @@
       -->
     <TestingPlatformShowTestsFailure>true</TestingPlatformShowTestsFailure>
     <UserSecretsId>e5f1f76e-e6ac-4f45-ac55-02e401325c2b</UserSecretsId>
-    <Version>9.0.1.2</Version>
+    <Version>10.0.5.1</Version>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\AspNetCore.Identity.CosmosDbV9.Tests\CosmosIdentityTestsBase.cs" Link="CosmosIdentityTestsBase.cs" />
-    <Compile Include="..\AspNetCore.Identity.CosmosDbV9.Tests\TestUtilities.cs" Link="TestUtilities.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="9.0.8" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="10.0.5" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
     <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" Version="17.14.2" />
     <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" Version="1.8.4" />
@@ -32,6 +27,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\AspNetCore.Identity.CosmosDb.Tests\AspNetCore.Identity.CosmosDb.Tests.csproj" />
     <ProjectReference Include="..\AspNetCore.Identity.CosmosDb\AspNetCore.Identity.CosmosDb.csproj" />
   </ItemGroup>
 

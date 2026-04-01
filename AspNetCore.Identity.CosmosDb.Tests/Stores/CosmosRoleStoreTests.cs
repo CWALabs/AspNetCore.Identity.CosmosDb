@@ -24,7 +24,7 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9.Stores
         /// <returns></returns>
         private async Task<IdentityRole> GetMockRandomRoleAsync()
         {
-            var role = new IdentityRole($"HUB{GetNextRandomNumber(1000, 9999)}");
+            var role = new IdentityRole($"HUB-{Guid.NewGuid():N}");
             role.NormalizedName = role.Name.ToUpper();
             using var roleStore = _testUtilities.GetRoleStore(connectionString, databaseName);
             var result = await roleStore.CreateAsync(role);
@@ -263,6 +263,72 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9.Stores
 
             // Assert
             Assert.IsTrue(result.Count > 0);
+        }
+
+        [TestMethod]
+        public async Task RemoveClaimAsync_WhenClaimDoesNotExist_DoesNotThrow()
+        {
+            using var roleStore = _testUtilities.GetRoleStore(connectionString, databaseName);
+            var role = await GetMockRandomRoleAsync();
+
+            await roleStore.RemoveClaimAsync(role, new Claim("missing-type", "missing-value"));
+
+            var claims = await roleStore.GetClaimsAsync(role);
+            Assert.AreEqual(0, claims.Count);
+        }
+
+        [TestMethod]
+        public async Task FindByIdAsync_WithWhitespace_ThrowsArgumentNullException()
+        {
+            using var roleStore = _testUtilities.GetRoleStore(connectionString, databaseName);
+
+            await Assert.ThrowsExceptionAsync<ArgumentNullException>(async () =>
+                await roleStore.FindByIdAsync("   "));
+        }
+
+        [TestMethod]
+        public async Task SetNormalizedRoleNameAsync_WithNull_ThrowsArgumentNullException()
+        {
+            using var roleStore = _testUtilities.GetRoleStore(connectionString, databaseName);
+            var role = await GetMockRandomRoleAsync();
+
+            await Assert.ThrowsExceptionAsync<ArgumentNullException>(async () =>
+                await roleStore.SetNormalizedRoleNameAsync(role, null, default));
+        }
+
+        [TestMethod]
+        public async Task Dispose_ThenUseStore_ThrowsObjectDisposedException()
+        {
+            using var roleStore = _testUtilities.GetRoleStore(connectionString, databaseName);
+            roleStore.Dispose();
+
+            await Assert.ThrowsExceptionAsync<ObjectDisposedException>(async () =>
+                await roleStore.FindByNameAsync("ANY"));
+        }
+
+        [TestMethod]
+        public async Task GuardClauses_ThrowExpectedExceptions()
+        {
+            using var roleStore = _testUtilities.GetRoleStore(connectionString, databaseName);
+
+            await Assert.ThrowsExceptionAsync<ArgumentNullException>(async () => await roleStore.CreateAsync(null));
+            await Assert.ThrowsExceptionAsync<ArgumentNullException>(async () => await roleStore.DeleteAsync(null));
+            await Assert.ThrowsExceptionAsync<ArgumentNullException>(async () => await roleStore.FindByNameAsync("  "));
+            await Assert.ThrowsExceptionAsync<ArgumentNullException>(async () => await roleStore.GetRoleIdAsync(null));
+            await Assert.ThrowsExceptionAsync<ArgumentNullException>(async () => await roleStore.GetRoleNameAsync(null));
+            await Assert.ThrowsExceptionAsync<ArgumentNullException>(async () => await roleStore.GetNormalizedRoleNameAsync(null));
+            await Assert.ThrowsExceptionAsync<ArgumentNullException>(async () => await roleStore.SetRoleNameAsync(null, "name"));
+            await Assert.ThrowsExceptionAsync<ArgumentNullException>(async () => await roleStore.UpdateAsync(null));
+        }
+
+        [TestMethod]
+        public async Task RemoveClaimAsync_WithNullArguments_ThrowsArgumentNullException()
+        {
+            using var roleStore = _testUtilities.GetRoleStore(connectionString, databaseName);
+            var role = await GetMockRandomRoleAsync();
+
+            await Assert.ThrowsExceptionAsync<ArgumentNullException>(async () => await roleStore.RemoveClaimAsync(null, GetMockClaim()));
+            await Assert.ThrowsExceptionAsync<ArgumentNullException>(async () => await roleStore.RemoveClaimAsync(role, null));
         }
     }
 }

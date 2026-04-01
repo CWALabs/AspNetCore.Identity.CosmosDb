@@ -116,6 +116,20 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9
         }
 
         /// <summary>
+        /// Ensures the test database and required containers exist.
+        /// </summary>
+        public async Task EnsureIdentityInfrastructureAsync(string connectionString, string databaseName)
+        {
+            using var utilities = GetContainerUtilities(connectionString, databaseName);
+            await utilities.CreateDatabaseAsync(databaseName);
+            await utilities.CreateRequiredContainers();
+
+            using var dbContext = GetDbContext(connectionString, databaseName);
+            await dbContext.Database.EnsureCreatedAsync();
+            await dbContext.SaveChangesAsync();
+        }
+
+        /// <summary>
         /// Get an instance of the Cosmos DB context.
         /// </summary>
         /// <param name="connectionName"></param>
@@ -147,12 +161,12 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9
         /// Get an instance of the Cosmos DB role store
         /// </summary>
         /// <returns></returns>
-        public CosmosRoleStore<IdentityUser, IdentityRole, string> GetRoleStore(string connectionString, string databaseName)
+        public CosmosRoleStore<IdentityRole, string> GetRoleStore(string connectionString, string databaseName)
         {
             var repository =
                 new CosmosIdentityRepository<CosmosIdentityDbContext<IdentityUser, IdentityRole, string>, IdentityUser,
                     IdentityRole, string>(GetDbContext(connectionString, databaseName));
-            var rolestore = new CosmosRoleStore<IdentityUser, IdentityRole, string>(repository);
+            var rolestore = new CosmosRoleStore<IdentityRole, string>(repository);
             return rolestore;
         }
 

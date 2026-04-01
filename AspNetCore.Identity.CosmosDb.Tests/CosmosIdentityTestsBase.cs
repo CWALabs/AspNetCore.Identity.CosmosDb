@@ -21,25 +21,10 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9
             _testUtilities = new TestUtilities();
             _random = new Random();
 
-            // Arrange class - remove prior data
-            using var dbContext = _testUtilities.GetDbContext(connectionString, databaseName, backwardCompatibility: backwardCompatibility);
-            try
-            {
-                var task = dbContext.Database.EnsureCreatedAsync();
-                task.Wait();
-
-                //dbContext.UserRoles.RemoveRange(dbContext.UserRoles.ToListAsync().Result);
-                //dbContext.Roles.RemoveRange(dbContext.Roles.ToListAsync().Result);
-                //dbContext.RoleClaims.RemoveRange(dbContext.RoleClaims.ToListAsync().Result);
-                //dbContext.UserClaims.RemoveRange(dbContext.UserClaims.ToListAsync().Result);
-                //dbContext.UserLogins.RemoveRange(dbContext.UserLogins.ToListAsync().Result);
-                //dbContext.Users.RemoveRange(dbContext.Users.ToListAsync().Result);
-            }
-            catch (Exception ex)
-            {
-                var trap = ex.Message; //Trap
-            }
-            var result = dbContext.SaveChanges();
+            _testUtilities
+                .EnsureIdentityInfrastructureAsync(connectionString, databaseName)
+                .GetAwaiter()
+                .GetResult();
         }
 
         /// <summary>
@@ -58,9 +43,9 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9
         /// </summary>
         /// <returns></returns>
         protected async Task<IdentityRole> GetMockRandomRoleAsync(
-            CosmosRoleStore<IdentityUser, IdentityRole, string> roleStore, bool saveToDatabase = true)
+            CosmosRoleStore<IdentityRole, string> roleStore, bool saveToDatabase = true)
         {
-            var role = new IdentityRole(GetNextRandomNumber(1000, 9999).ToString());
+            var role = new IdentityRole($"role-{Guid.NewGuid():N}");
             role.NormalizedName = role.Name.ToUpper();
 
             if (roleStore != null && saveToDatabase)

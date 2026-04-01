@@ -11,9 +11,11 @@ using System.Linq;
 namespace AspNetCore.Identity.CosmosDb
 {
     /// <summary>
-    /// Cosmos Identity Database Context
+    /// Entity Framework Core Cosmos DB context used by the ASP.NET Core Identity stores in this package.
     /// </summary>
-    /// <typeparam name="TUserEntity"></typeparam>
+    /// <typeparam name="TUser">The user entity type.</typeparam>
+    /// <typeparam name="TRole">The role entity type.</typeparam>
+    /// <typeparam name="TKey">The primary key type for users and roles.</typeparam>
     public class CosmosIdentityDbContext<TUser, TRole, TKey> :
         IdentityDbContext<TUser, TRole, TKey>
         where TUser : IdentityUser<TKey>
@@ -30,10 +32,13 @@ namespace AspNetCore.Identity.CosmosDb
                         ?.Value?.Stores;
 
         /// <summary>
-        /// Constructor
+        /// Initializes a Cosmos-backed Identity DbContext.
         /// </summary>
-        /// <param name="options"></param>
-        /// <param name="createDbAndContainers">Context with create the database and containers upon model creating.</param>
+        /// <param name="options">The EF Core DbContext options.</param>
+        /// <param name="backwardCompatibility">
+        /// When <see langword="true"/>, configures the model to read older databases that use
+        /// <c>Discriminator</c> instead of <c>$type</c> for the embedded discriminator name.
+        /// </param>
         public CosmosIdentityDbContext(
             DbContextOptions options,
             bool backwardCompatibility = false)
@@ -42,51 +47,61 @@ namespace AspNetCore.Identity.CosmosDb
             _backwardCompatibility = backwardCompatibility;
         }
 
-        /// <summary>
-        /// OnModelCreating event override.
-        /// </summary>
-        /// <param name="builder"></param>
-        protected override void OnModelCreating(ModelBuilder builder)
+        private int GetMaxKeyLength(StoreOptions? storeOptions)
         {
+            var maxKeyLength = storeOptions?.MaxLengthForKeys ?? 0;
+            return maxKeyLength == 0 ? 128 : maxKeyLength;
+        }
 
+        private PersonalDataConverter? CreatePersonalDataConverter(StoreOptions? storeOptions)
+        {
+            if (storeOptions?.ProtectPersonalData != true)
+            {
+                return null;
+            }
+
+            return new PersonalDataConverter(this.GetService<IPersonalDataProtector>());
+        }
+
+        private static void ConfigureCosmosIdentityConventions(ModelBuilder builder)
+        {
             // dotnet/efcore#35224
-            // New behavior for Cosmos DB EF is new.  For backward compatibility,
+            // New behavior for Cosmos DB EF is new. For backward compatibility,
             // we need to add the following line to the OnModelCreating method.
             builder.HasDiscriminatorInJsonIds();
 
             // dotnet/efcore#35264
-            // New behavior for Cosmos DB EF is to throw an error whenever it detects
-            // an entity has an index.  This means we have to completely override the base
-            // OnModelCreating method and not call it.
+            // Cosmos DB EF now throws when indexes are detected. That means we must
+            // not call the IdentityDbContext base implementation here.
 #pragma warning disable S125 // Sections of code should not be commented out
             // base.OnModelCreating(builder);
 #pragma warning restore S125 // Sections of code should not be commented out
+        }
 
-
-            // The following code is from the base.OnModelCreating method.
-            var storeOptions = GetStoreOptions();
-            var maxKeyLength = storeOptions?.MaxLengthForKeys ?? 0;
-
-            if (maxKeyLength == 0)
-            {
-                maxKeyLength = 128;
-            }
-
-            var encryptPersonalData = storeOptions?.ProtectPersonalData ?? false;
-            PersonalDataConverter? dataConverter = null;
-
-            if (encryptPersonalData)
-            {
-                dataConverter = new PersonalDataConverter(this.GetService<IPersonalDataProtector>());
-            }
-
-            // Cosmos DB Modifications
-            builder.ApplyIdentityMappings<TUser, TRole, TKey>(dataConverter, maxKeyLength);
-
+        private void ConfigureBackwardCompatibility(ModelBuilder builder)
+        {
             if (_backwardCompatibility)
             {
                 builder.HasEmbeddedDiscriminatorName("Discriminator");
             }
+        }
+
+        /// <summary>
+        /// Configures Cosmos-specific Identity model conventions.
+        /// </summary>
+        /// <param name="builder">The model builder.</param>
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            ConfigureCosmosIdentityConventions(builder);
+
+            var storeOptions = GetStoreOptions();
+            var maxKeyLength = GetMaxKeyLength(storeOptions);
+            var dataConverter = CreatePersonalDataConverter(storeOptions);
+
+            // Cosmos DB Modifications
+            builder.ApplyIdentityMappings<TUser, TRole, TKey>(dataConverter, maxKeyLength);
+
+            ConfigureBackwardCompatibility(builder);
         }
 
     }

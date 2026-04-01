@@ -1,6 +1,7 @@
 ﻿using Microsoft.Azure.Cosmos;
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace AspNetCore.Identity.CosmosDb.Containers
@@ -84,7 +85,7 @@ namespace AspNetCore.Identity.CosmosDb.Containers
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
         /// <remarks>WARNING! ALL DATA WILL BE LOST AND THIS CANNOT BE UNDONE!</remarks>
-        public async Task<DatabaseResponse> DeleteDatabaseIfExists(string databaseName)
+        public async Task<DatabaseResponse?> DeleteDatabaseIfExists(string databaseName)
         {
             if (string.IsNullOrEmpty(databaseName))
                 throw new ArgumentNullException(nameof(databaseName));
@@ -97,13 +98,9 @@ namespace AspNetCore.Identity.CosmosDb.Containers
 
                 return response;
             }
-            catch (Exception e)
+            catch (CosmosException e) when (e.StatusCode == HttpStatusCode.NotFound)
             {
-                if (e.Message.Contains("NotFound (404)"))
-                {
-                    return null;
-                }
-                throw;
+                return null;
             }
         }
 
@@ -127,23 +124,10 @@ namespace AspNetCore.Identity.CosmosDb.Containers
             if (!partitionKeyPath.StartsWith('/'))
                 throw new ArgumentException(nameof(partitionKeyPath), "Path must begin with /");
 
-            try
-            {
-                Container container = await _client.GetDatabase(_databaseName).CreateContainerIfNotExistsAsync(
-                        id: containerName,
-                        partitionKeyPath: partitionKeyPath, throughput);
-                return container;
-            }
-            catch (Microsoft.Azure.Cosmos.CosmosException c)
-            {
-                var d = c;
-                throw;
-            }
-            catch (Exception e)
-            {
-                var t = e;
-                throw;
-            }
+            Container container = await _client.GetDatabase(_databaseName).CreateContainerIfNotExistsAsync(
+                    id: containerName,
+                    partitionKeyPath: partitionKeyPath, throughput);
+            return container;
         }
 
         /// <summary>
@@ -165,18 +149,15 @@ namespace AspNetCore.Identity.CosmosDb.Containers
             {
                 response = await container.DeleteContainerAsync();
             }
-            catch (Exception e)
+            catch (CosmosException e) when (e.StatusCode == HttpStatusCode.NotFound)
             {
-                if (e.Message.Contains("NotFound (404)"))
-                {
-                    return true;
-                }
-                throw;
+                return true;
             }
 
             switch (response.StatusCode)
             {
                 case System.Net.HttpStatusCode.OK:
+                case System.Net.HttpStatusCode.NoContent:
                     return true;
                 case System.Net.HttpStatusCode.Unauthorized:
                 case System.Net.HttpStatusCode.Forbidden:
@@ -197,6 +178,7 @@ namespace AspNetCore.Identity.CosmosDb.Containers
             list.Add(new ContainerDefinition() { ContainerName = "Identity", PartitionKey = "/Id" });
             list.Add(new ContainerDefinition() { ContainerName = "Identity_DeviceFlowCodes", PartitionKey = "/SessionId" });
             list.Add(new ContainerDefinition() { ContainerName = "Identity_Logins", PartitionKey = "/ProviderKey" });
+            list.Add(new ContainerDefinition() { ContainerName = "Identity_Passkeys", PartitionKey = "/UserId" });
             list.Add(new ContainerDefinition() { ContainerName = "Identity_PersistedGrant", PartitionKey = "/Key" });
             list.Add(new ContainerDefinition() { ContainerName = "Identity_Tokens", PartitionKey = "/UserId" });
             list.Add(new ContainerDefinition() { ContainerName = "Identity_UserRoles", PartitionKey = "/UserId" });

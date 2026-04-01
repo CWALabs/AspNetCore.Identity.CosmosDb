@@ -1,28 +1,51 @@
-name: NuGet Push
+name: NuGet Publish
 
 on:
   workflow_dispatch
-  # push:
-  #   branches: [ "master" ]
-  # pull_request:
-  #   branches: [ "master" ]
+
 jobs:
-  build:
-
+  test:
+    name: Run Tests
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v3
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: 9.0.x
-    - name: Restore dependencies
-      run: dotnet restore
-    - name: Build
-      run: dotnet build --no-restore -c Release
-   
-    - name: Publish NuGet
-      run: dotnet nuget push /home/runner/work/AspNetCore.Identity.CosmosDb/AspNetCore.Identity.CosmosDb/AspNetCore.Identity.CosmosDb/bin/Release/*.nupkg --api-key ${{ secrets.NUGET_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
- #  - name: Publish NuGet Symbols
- #      run: dotnet nuget push /home/runner/work/AspNetCore.Identity.CosmosDb/AspNetCore.Identity.CosmosDb/AspNetCore.Identity.CosmosDb/bin/Release/*.snupkg --api-key ${{ secrets.NUGET_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+      - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - name: Restore
+        run: dotnet restore
+      - name: Build
+        run: dotnet build --no-restore -c Release
+      - name: Run main tests
+        env:
+          APPLICATIONDBCONTEXTCONNECTION: ${{ secrets.APPLICATIONDBCONTEXTCONNECTION }}
+          COSMOSIDENTITYDBNAME: ${{ secrets.COSMOSIDENTITYDBNAME }}
+        run: dotnet test AspNetCore.Identity.CosmosDb.Tests/AspNetCore.Identity.CosmosDb.Tests.csproj --no-build -c Release --verbosity normal
+      - name: Run compatibility tests
+        env:
+          COSMOSDB: ${{ secrets.COSMOSDB }}
+          COSMOSIDENTITYDBNAME: ${{ secrets.COSMOSIDENTITYDBNAME }}
+        run: dotnet test AspNetCore.Identity.CosmosDbCompat.Tests/AspNetCore.Identity.CosmosDbCompat.Tests.csproj --no-build -c Release --verbosity normal
+
+  publish:
+    name: Publish to NuGet
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Required for Source Link to embed full commit history
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - name: Restore
+        run: dotnet restore
+      - name: Pack
+        run: dotnet pack AspNetCore.Identity.CosmosDb/AspNetCore.Identity.CosmosDb.csproj -c Release --no-restore -o ./nupkg
+      - name: Publish NuGet package
+        run: dotnet nuget push "${{ github.workspace }}/nupkg/*.nupkg" --api-key ${{ secrets.NUGET_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+      - name: Publish NuGet symbols
+        run: dotnet nuget push "${{ github.workspace }}/nupkg/*.snupkg" --api-key ${{ secrets.NUGET_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+

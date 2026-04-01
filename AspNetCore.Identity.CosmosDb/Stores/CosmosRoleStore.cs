@@ -1,9 +1,9 @@
 ﻿using AspNetCore.Identity.CosmosDb.Contracts;
-using Duende.IdentityServer.EntityFramework.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading;
@@ -15,58 +15,34 @@ namespace AspNetCore.Identity.CosmosDb.Stores
     /// Cosmos DB Role Store
     /// </summary>
     /// <typeparam name="TRoleEntity"></typeparam>
-    public class CosmosRoleStore<TUserRoleEntity, TRoleEntity, TKey> : IRoleStore<TRoleEntity>,
+    public class CosmosRoleStore<TRoleEntity, TKey> : IdentityStoreBase,
+        IRoleStore<TRoleEntity>,
         IQueryableRoleStore<TRoleEntity>,
         IRoleClaimStore<TRoleEntity>
         where TRoleEntity : IdentityRole<TKey>, new()
         where TKey : IEquatable<TKey>
-
     {
-        private readonly IRepository _repo;
-        private bool _disposed;
-
-        /// <summary>
-        /// Throws if this class has been disposed.
-        /// </summary>
-        protected void ThrowIfDisposed()
-        {
-            if (_disposed)
-            {
-                throw new ObjectDisposedException(GetType().Name);
-            }
-        }
-
         /// <summary>
         /// Role query
         /// </summary>
-        public IQueryable<TRoleEntity> Roles
-        {
-            get { return (IQueryable<TRoleEntity>)_repo.Roles; }
-        }
+        public IQueryable<TRoleEntity> Roles => (IQueryable<TRoleEntity>)_repo.Roles;
 
         /// <summary>
         /// UserRoles query
         /// </summary>
-        public IQueryable<IdentityUserRole<TKey>> UserRoles
-        {
-            get { return (IQueryable<IdentityUserRole<TKey>>)_repo.UserRoles; }
-        }
+        public IQueryable<IdentityUserRole<TKey>> UserRoles => (IQueryable<IdentityUserRole<TKey>>)_repo.UserRoles;
 
         /// <summary>
         /// UserRoles query
         /// </summary>
-        public IQueryable<IdentityRoleClaim<TKey>> RoleClaims
-        {
-            get { return (IQueryable<IdentityRoleClaim<TKey>>)_repo.RoleClaims; }
-        }
+        public IQueryable<IdentityRoleClaim<TKey>> RoleClaims => (IQueryable<IdentityRoleClaim<TKey>>)_repo.RoleClaims;
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="repo"></param>
-        public CosmosRoleStore(IRepository repo)
+        public CosmosRoleStore(IRepository repo) : base(repo)
         {
-            _repo = repo;
         }
 
 
@@ -86,7 +62,7 @@ namespace AspNetCore.Identity.CosmosDb.Stores
             }
             catch (Exception ex)
             {
-                return IdentityResult.Failed(new IdentityError { Description = ex.Message });
+                return ProcessExceptions(ex);
             }
 
             return IdentityResult.Success;
@@ -122,7 +98,7 @@ namespace AspNetCore.Identity.CosmosDb.Stores
             }
             catch (Exception ex)
             {
-                return IdentityResult.Failed(new IdentityError { Description = ex.Message });
+                return ProcessExceptions(ex);
             }
 
             return IdentityResult.Success;
@@ -134,11 +110,12 @@ namespace AspNetCore.Identity.CosmosDb.Stores
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
 
-            if (string.IsNullOrEmpty(roleId) || string.IsNullOrWhiteSpace(roleId))
+            if (string.IsNullOrWhiteSpace(roleId))
                 throw new ArgumentNullException(nameof(roleId));
 
+            var typedId = (TKey)TypeDescriptor.GetConverter(typeof(TKey)).ConvertFromInvariantString(roleId);
             var role = await _repo.Table<TRoleEntity>()
-                .SingleOrDefaultAsync(_ => _.Id.Equals(roleId), cancellationToken: cancellationToken);
+                .SingleOrDefaultAsync(_ => _.Id.Equals(typedId), cancellationToken: cancellationToken);
 
             return role;
         }
@@ -150,11 +127,11 @@ namespace AspNetCore.Identity.CosmosDb.Stores
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
 
-            if (string.IsNullOrEmpty(normalizedName) || string.IsNullOrWhiteSpace(normalizedName))
+            if (string.IsNullOrWhiteSpace(normalizedName))
                 throw new ArgumentNullException(nameof(normalizedName));
 
             var role = await _repo.Table<TRoleEntity>()
-                .SingleOrDefaultAsync(_ => _.NormalizedName == normalizedName, cancellationToken: cancellationToken);
+                .FirstOrDefaultAsync(_ => _.NormalizedName == normalizedName, cancellationToken: cancellationToken);
 
             return role;
         }
@@ -250,7 +227,7 @@ namespace AspNetCore.Identity.CosmosDb.Stores
             }
             catch (Exception ex)
             {
-                return IdentityResult.Failed(new IdentityError { Description = ex.Message });
+                return ProcessExceptions(ex);
             }
 
             return IdentityResult.Success;
@@ -263,7 +240,7 @@ namespace AspNetCore.Identity.CosmosDb.Stores
             ThrowIfDisposed();
 
             if (user == null) throw new ArgumentNullException(nameof(user));
-            if (object.Equals(value, default(T))) throw new ArgumentNullException(nameof(value));
+            if (EqualityComparer<T>.Default.Equals(value, default)) throw new ArgumentNullException(nameof(value));
 
             setter(user, value);
         }
@@ -272,6 +249,7 @@ namespace AspNetCore.Identity.CosmosDb.Stores
         public void Dispose()
         {
             _disposed = true;
+            GC.SuppressFinalize(this);
         }
 
         #region Methods that implement IRoleClaimStore<TRoleEntity>
@@ -284,10 +262,16 @@ namespace AspNetCore.Identity.CosmosDb.Stores
             if (role == null)
                 throw new ArgumentNullException(nameof(role));
 
-            var claims = await _repo.Table<IdentityRoleClaim<TKey>>().Where(c => c.RoleId.Equals(role.Id))
-                .ToListAsync(cancellationToken);
+            var claims = await GetRoleClaimsInternalAsync(role.Id, cancellationToken);
 
             return claims.Select(c => c.ToClaim()).ToList();
+        }
+
+        private async Task<List<IdentityRoleClaim<TKey>>> GetRoleClaimsInternalAsync(TKey roleId,
+            CancellationToken cancellationToken)
+        {
+            return await _repo.Table<IdentityRoleClaim<TKey>>().Where(c => c.RoleId.Equals(roleId))
+                .ToListAsync(cancellationToken);
         }
 
         // <inheritdoc />
@@ -295,7 +279,7 @@ namespace AspNetCore.Identity.CosmosDb.Stores
         {
             // Since the IdentityRoleClaim requires an integer ID, we need to get the last ID used and increment by one.
             // This means that if this fails, because of a concurrency issue, we need to retry.
-            await Retry.Do(async () => await InternalAddClaimAsync(role, claim, cancellationToken), TimeSpan.FromSeconds(1)).WaitAsync(cancellationToken);
+            await Retry.DoAsync(async () => await InternalAddClaimAsync(role, claim, cancellationToken), TimeSpan.FromSeconds(1), cancellationToken: cancellationToken);
         }
 
         private async Task InternalAddClaimAsync(TRoleEntity role, Claim claim, CancellationToken cancellationToken = default)
@@ -329,12 +313,20 @@ namespace AspNetCore.Identity.CosmosDb.Stores
             if (claim == null)
                 throw new ArgumentNullException(nameof(claim));
 
-            var doomed = await _repo.Table<IdentityRoleClaim<TKey>>()
-                .FirstOrDefaultAsync(c => c.RoleId.Equals(role.Id) &&
-                                          c.ClaimValue == claim.Value && c.ClaimType == c.ClaimType, cancellationToken);
+            var doomed = await FindRoleClaimAsync(role.Id, claim.Type, claim.Value, cancellationToken);
+            if (doomed != null)
+            {
+                _repo.Delete(doomed);
+                await _repo.SaveChangesAsync().WaitAsync(cancellationToken);
+            }
+        }
 
-            _repo.Delete(doomed);
-            await _repo.SaveChangesAsync().WaitAsync(cancellationToken);
+        private async Task<IdentityRoleClaim<TKey>> FindRoleClaimAsync(TKey roleId, string claimType, string claimValue,
+            CancellationToken cancellationToken)
+        {
+            return await _repo.Table<IdentityRoleClaim<TKey>>()
+                .FirstOrDefaultAsync(c => c.RoleId.Equals(roleId) &&
+                                          c.ClaimValue == claimValue && c.ClaimType == claimType, cancellationToken);
         }
 
         #endregion

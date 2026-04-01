@@ -1,20 +1,20 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net9.0</TargetFramework>
+		<TargetFramework>net10.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 
-		<Version>9.0.1.2</Version>
-		<AssemblyVersion>9.0.1.2</AssemblyVersion>
-		<FileVersion>9.0.1.2</FileVersion>
+		<Version>10.0.5.1</Version>
+		<AssemblyVersion>10.0.5.1</AssemblyVersion>
+		<FileVersion>10.0.5.1</FileVersion>
 		<IsPackable>false</IsPackable>
 
 		<UserSecretsId>e5f1f76e-e6ac-4f45-ac55-02e401325c2b</UserSecretsId>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="9.0.8" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="9.0.8" />
+		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.5" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="10.0.5" />
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
 		<PackageReference Include="MSTest.TestAdapter" Version="3.10.4" />
 		<PackageReference Include="MSTest.TestFramework" Version="3.10.4" />
@@ -23,7 +23,6 @@
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="Moq" Version="4.20.72" />
-		<PackageReference Include="System.Text.Json" Version="9.0.8" />
 	</ItemGroup>
 
 	<ItemGroup>

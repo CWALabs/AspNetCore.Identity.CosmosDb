@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using AspNetCore.Identity.CosmosDb.Repositories;
 
 namespace AspNetCore.Identity.CosmosDb.Tests.Net9.Stores
 {
@@ -44,6 +45,13 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9.Stores
             user.NormalizedEmail = user.Email.ToUpper();
 
             user.Id = TestUtilities.IDENUSER1ID;
+
+            var existing = await userStore.FindByIdAsync(TestUtilities.IDENUSER1ID);
+            if (existing != null)
+            {
+                var cleanup = await userStore.DeleteAsync(existing);
+                Assert.IsTrue(cleanup.Succeeded);
+            }
 
 
             // Act - create the user
@@ -728,6 +736,198 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9.Stores
 
             // Assert
             Assert.IsNotNull(code);
+        }
+
+        [TestMethod]
+        public async Task RepositoryCrudMethodsTest()
+        {
+            using var dbContext = _testUtilities.GetDbContext(connectionString, databaseName);
+            var repository = new CosmosIdentityRepository<CosmosIdentityDbContext<IdentityUser, IdentityRole, string>, IdentityUser, IdentityRole, string>(dbContext);
+
+            Assert.IsNotNull(repository.Users);
+            Assert.IsNotNull(repository.Roles);
+            Assert.IsNotNull(repository.UserClaims);
+            Assert.IsNotNull(repository.UserRoles);
+            Assert.IsNotNull(repository.UserLogins);
+            Assert.IsNotNull(repository.RoleClaims);
+            Assert.IsNotNull(repository.UserTokens);
+
+            var userId = Guid.NewGuid().ToString();
+            var user = new IdentityUser($"repo-{userId}@acme.test")
+            {
+                Id = userId,
+                Email = $"repo-{userId}@acme.test",
+                NormalizedEmail = $"REPO-{userId}@ACME.TEST",
+                NormalizedUserName = $"REPO-{userId}@ACME.TEST"
+            };
+
+            repository.Add(user);
+            await repository.SaveChangesAsync();
+
+            var table = repository.Table<IdentityUser>();
+            Assert.IsNotNull(table);
+
+            var foundByIdAsync = await repository.GetByIdAsync<IdentityUser>(userId);
+            Assert.IsNotNull(foundByIdAsync);
+
+            var foundOneAsync = await repository.TryFindOneAsync<IdentityUser>(_ => _.Id == userId);
+            Assert.IsNotNull(foundOneAsync);
+
+            var foundList = await repository.Find<IdentityUser>(_ => _.Id == userId).ToListAsync();
+            Assert.AreEqual(1, foundList.Count);
+
+            foundList[0].PhoneNumber = "1111111111";
+            repository.Update(foundList[0]);
+            await repository.SaveChangesAsync();
+
+            var reloaded = await repository.Find<IdentityUser>(_ => _.Id == userId).ToListAsync();
+            Assert.AreEqual("1111111111", reloaded[0].PhoneNumber);
+
+            await repository.DeleteAsync<IdentityUser>(_ => _.Id == userId);
+            await repository.SaveChangesAsync();
+
+            var deleted = await repository.Find<IdentityUser>(_ => _.Id == userId).ToListAsync();
+            Assert.AreEqual(0, deleted.Count);
+        }
+
+        [TestMethod]
+        public async Task RepositoryDeleteByIdTest()
+        {
+            using var dbContext = _testUtilities.GetDbContext(connectionString, databaseName);
+            var repository = new CosmosIdentityRepository<CosmosIdentityDbContext<IdentityUser, IdentityRole, string>, IdentityUser, IdentityRole, string>(dbContext);
+
+            var userId = Guid.NewGuid().ToString();
+            repository.Add(new IdentityUser($"repo-delete-{userId}@acme.test")
+            {
+                Id = userId,
+                Email = $"repo-delete-{userId}@acme.test",
+                NormalizedEmail = $"REPO-DELETE-{userId}@ACME.TEST",
+                NormalizedUserName = $"REPO-DELETE-{userId}@ACME.TEST"
+            });
+            await repository.SaveChangesAsync();
+
+            await repository.DeleteByIdAsync<IdentityUser>(userId);
+            await repository.SaveChangesAsync();
+
+            var deleted = await repository.Find<IdentityUser>(_ => _.Id == userId).ToListAsync();
+            Assert.AreEqual(0, deleted.Count);
+        }
+
+        [TestMethod]
+        public async Task RepositoryAsyncMethods_NotFoundPaths_BehaveAsExpected()
+        {
+            using var dbContext = _testUtilities.GetDbContext(connectionString, databaseName);
+            var repository = new CosmosIdentityRepository<CosmosIdentityDbContext<IdentityUser, IdentityRole, string>, IdentityUser, IdentityRole, string>(dbContext);
+
+            var missingId = Guid.NewGuid().ToString();
+
+            var byId = await repository.GetByIdAsync<IdentityUser>(missingId);
+            Assert.IsNull(byId);
+
+            var one = await repository.TryFindOneAsync<IdentityUser>(_ => _.Id == missingId);
+            Assert.IsNull(one);
+
+            await repository.DeleteByIdAsync<IdentityUser>(missingId);
+            await repository.SaveChangesAsync();
+
+            await repository.DeleteAsync<IdentityUser>(_ => _.Id == missingId);
+            await repository.SaveChangesAsync();
+
+            var none = await repository.Find<IdentityUser>(_ => _.Id == missingId).ToListAsync();
+            Assert.AreEqual(0, none.Count);
+        }
+
+        [TestMethod]
+        public async Task RepositoryDeleteAsync_WithPredicate_RemovesMultipleEntities()
+        {
+            using var dbContext = _testUtilities.GetDbContext(connectionString, databaseName);
+            var repository = new CosmosIdentityRepository<CosmosIdentityDbContext<IdentityUser, IdentityRole, string>, IdentityUser, IdentityRole, string>(dbContext);
+
+            var group = $"bulk-{Guid.NewGuid():N}";
+            var id1 = Guid.NewGuid().ToString();
+            var id2 = Guid.NewGuid().ToString();
+
+            repository.Add(new IdentityUser($"{group}-1@acme.test")
+            {
+                Id = id1,
+                Email = $"{group}-1@acme.test",
+                NormalizedEmail = $"{group}-1@acme.test".ToUpperInvariant(),
+                NormalizedUserName = $"{group}-1@acme.test".ToUpperInvariant(),
+                PhoneNumber = group
+            });
+
+            repository.Add(new IdentityUser($"{group}-2@acme.test")
+            {
+                Id = id2,
+                Email = $"{group}-2@acme.test",
+                NormalizedEmail = $"{group}-2@acme.test".ToUpperInvariant(),
+                NormalizedUserName = $"{group}-2@acme.test".ToUpperInvariant(),
+                PhoneNumber = group
+            });
+
+            await repository.SaveChangesAsync();
+
+            var before = await repository.Find<IdentityUser>(_ => _.PhoneNumber == group).ToListAsync();
+            Assert.AreEqual(2, before.Count);
+
+            await repository.DeleteAsync<IdentityUser>(_ => _.PhoneNumber == group);
+            await repository.SaveChangesAsync();
+
+            var after = await repository.Find<IdentityUser>(_ => _.PhoneNumber == group).ToListAsync();
+            Assert.AreEqual(0, after.Count);
+        }
+
+        [TestMethod]
+        public async Task UserStoreGuardClauses_ThrowExpectedExceptions()
+        {
+            using var userStore = _testUtilities.GetUserStore(connectionString, databaseName);
+
+            await Assert.ThrowsExceptionAsync<ArgumentNullException>(async () => await userStore.FindByEmailAsync(null));
+            await Assert.ThrowsExceptionAsync<ArgumentNullException>(async () => await userStore.FindByIdAsync(null));
+            await Assert.ThrowsExceptionAsync<ArgumentNullException>(async () => await userStore.FindByNameAsync(null));
+            await Assert.ThrowsExceptionAsync<ArgumentNullException>(async () => await userStore.CreateAsync(null));
+            await Assert.ThrowsExceptionAsync<ArgumentNullException>(async () => await userStore.DeleteAsync(null));
+
+            var updateResult = await userStore.UpdateAsync(null);
+            Assert.IsFalse(updateResult.Succeeded);
+        }
+
+        [TestMethod]
+        public async Task AddToRoleAsync_WhenRoleMissing_ThrowsInvalidOperationException()
+        {
+            using var userStore = _testUtilities.GetUserStore(connectionString, databaseName);
+            var user = await GetMockRandomUserAsync(userStore);
+
+            await Assert.ThrowsExceptionAsync<InvalidOperationException>(async () =>
+                await userStore.AddToRoleAsync(user, $"missing-{Guid.NewGuid():N}"));
+        }
+
+        [TestMethod]
+        public async Task SetTokenAsync_WithNullUser_ThrowsArgumentNullException()
+        {
+            using var userStore = _testUtilities.GetUserStore(connectionString, databaseName);
+
+            await Assert.ThrowsExceptionAsync<ArgumentNullException>(async () =>
+                await userStore.SetTokenAsync(null, "provider", "name", "value", default));
+        }
+
+        [TestMethod]
+        public async Task FindByPasskeyIdAsync_WithNullCredential_ThrowsArgumentNullException()
+        {
+            using var userStore = _testUtilities.GetUserStore(connectionString, databaseName);
+
+            await Assert.ThrowsExceptionAsync<ArgumentNullException>(async () =>
+                await userStore.FindByPasskeyIdAsync(null, default));
+        }
+
+        [TestMethod]
+        public async Task Dispose_ThenUseStore_ThrowsObjectDisposedException()
+        {
+            using var userStore = _testUtilities.GetUserStore(connectionString, databaseName);
+            userStore.Dispose();
+
+            await Assert.ThrowsExceptionAsync<ObjectDisposedException>(async () =>
+                await userStore.GetRolesAsync(new IdentityUser()));
         }
     }
 }

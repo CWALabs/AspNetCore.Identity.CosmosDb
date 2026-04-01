@@ -1,64 +1,48 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<TargetFramework>net9.0</TargetFramework>
-		<Version>9.0.1.2</Version>
-		<AssemblyVersion>9.0.1.2</AssemblyVersion>
-		<FileVersion>9.0.1.2</FileVersion>
-		
-		<PackageVersion>9.0.1.2</PackageVersion>
-		
-		<Authors>toiyabe62</Authors>
-		<Nullable>enable</Nullable>
-		<RepositoryType>GitHub</RepositoryType>
-		<PackageTags>Cosmos, CosmosDB, Identity, Provider, AspNetCore, Membership, Roles, AspNetCore.Identity, AspNetCore.Identity.CosmosDb, Microsoft.AspNetCore.Identity, aspnet, efcore, Azure Cosmos DB</PackageTags>
-		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-		<PackageId>AspNetCore.Identity.CosmosDb</PackageId>
-		<RepositoryUrl>https://github.com/CosmosSoftware/AspNetCore.Identity.CosmosDb</RepositoryUrl>
-		<PackageProjectUrl>https://github.com/CosmosSoftware/AspNetCore.Identity.CosmosDb</PackageProjectUrl>
-		<PackageIcon>B2C_BrandIcon_Black.png</PackageIcon>
-		<PackageReadmeFile>README.md</PackageReadmeFile>
-		<IncludeSymbols>true</IncludeSymbols>
-		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
-		<RepositoryType>git</RepositoryType>
-		<Description>A Cosmos DB implementation of ASP.NET Core Identity.</Description>
-		<PackageLicenseExpression>MIT</PackageLicenseExpression>
-		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
-		<Company>Cosmos Software LLC</Company>
-		<Copyright>Moonrise Software LLC</Copyright>
-		<PackageReleaseNotes>Dependencies update.</PackageReleaseNotes>
-		<NoWin32Manifest>true</NoWin32Manifest>
-		<Title>ASP.NET Core Identity Provider for Azure Cosmos DB</Title>
-	</PropertyGroup>
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Version>10.0.5.1</Version>
+    <Nullable>enable</Nullable>
 
-	<ItemGroup>
-		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.8" />
-        <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="9.0.8" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Cosmos" Version="9.0.8" />
-		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="9.0.8" />
-		<PackageReference Include="System.Text.Json" Version="9.0.8" />
-	</ItemGroup>
+    <!-- Package identity -->
+    <PackageId>AspNetCore.Identity.CosmosDb</PackageId>
+    <Title>ASP.NET Core Identity Provider for Azure Cosmos DB</Title>
+    <Description>A Cosmos DB implementation of ASP.NET Core Identity.</Description>
+    <Authors>Moonrise Software LLC</Authors>
+    <Company>Moonrise Software LLC</Company>
+    <Copyright>Copyright © Moonrise Software LLC</Copyright>
+    <PackageTags>Cosmos;CosmosDB;Identity;AspNetCore;AspNetCore.Identity;EntityFramework;EFCore;Azure;Membership;Roles</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <PackageIcon>B2C_BrandIcon_Black.png</PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageReleaseNotes>Added passkey (WebAuthn) support. Upgraded to .NET 10 and EF Core 10.</PackageReleaseNotes>
+    <PackageProjectUrl>https://github.com/CosmosSoftware/AspNetCore.Identity.CosmosDb</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/CosmosSoftware/AspNetCore.Identity.CosmosDb</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
 
-	<ItemGroup>
-		<Content Include="B2C_BrandIcon_Black.png" />
-		<Content Include="_res\icons\B2C_BrandIcon_Black.png" />
-		<None Include="../README.md" Pack="true" PackagePath="\" />
-		<PackageReference Include="Duende.IdentityServer.EntityFramework.Storage" Version="7.3.1" />
-		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-	</ItemGroup>
+    <!-- Symbols and Source Link -->
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">true</ContinuousIntegrationBuild>
+  </PropertyGroup>
 
-	<ItemGroup>
-		<None Include="_res\icons\nuget-icon.png">
-			<Pack>True</Pack>
-			<PackagePath></PackagePath>
-		</None>
-	</ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Duende.IdentityServer.EntityFramework.Storage" Version="7.3.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.5" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="10.0.5" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Cosmos" Version="10.0.5" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.5" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+  </ItemGroup>
 
-	<ItemGroup>
-	  <None Update="B2C_BrandIcon_Black.png">
-	    <Pack>True</Pack>
-	    <PackagePath>\</PackagePath>
-	  </None>
-	</ItemGroup>
+  <ItemGroup>
+    <None Include="B2C_BrandIcon_Black.png" Pack="true" PackagePath="\" />
+    <None Include="../README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
 
 </Project>

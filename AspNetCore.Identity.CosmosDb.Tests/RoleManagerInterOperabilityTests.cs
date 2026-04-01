@@ -23,7 +23,7 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9
         }
 
         [ClassInitialize]
-        public static void Initialize(TestContext context)
+        public static async Task Initialize(TestContext context)
         {
             connectionString = TestUtilities.GetKeyValue("ApplicationDbContextConnection");
             databaseName = TestUtilities.GetKeyValue("CosmosIdentityDbName");
@@ -32,11 +32,11 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9
             using var dbContext = _testUtilities.GetDbContext(connectionString, databaseName);
 
             // Clean up claims for test.
-            var claims = dbContext.RoleClaims.ToListAsync().Result;
-            var uclaims = dbContext.UserClaims.ToListAsync().Result;
+            var claims = await dbContext.RoleClaims.ToListAsync();
+            var uclaims = await dbContext.UserClaims.ToListAsync();
             dbContext.RoleClaims.RemoveRange(claims);
             dbContext.UserClaims.RemoveRange(uclaims);
-            var t = dbContext.SaveChangesAsync();
+            await dbContext.SaveChangesAsync();
 
         }
 
