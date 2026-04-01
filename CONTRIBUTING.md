@@ -24,7 +24,7 @@ The current tests expect these settings:
 
 ```json
 {
-  "CosmosDB": "AccountEndpoint=...;AccountKey=...;",
+  "ApplicationDbContextConnection": "AccountEndpoint=...;AccountKey=...;",
   "CosmosIdentityDbName": "localtests"
 }
 ```

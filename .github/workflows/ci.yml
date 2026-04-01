@@ -34,6 +34,6 @@ jobs:
 
       - name: Run compatibility tests
         env:
-          COSMOSDB: ${{ secrets.COSMOSDB }}
+          APPLICATIONDBCONTEXTCONNECTION: ${{ secrets.APPLICATIONDBCONTEXTCONNECTION }}
           COSMOSIDENTITYDBNAME: ${{ secrets.COSMOSIDENTITYDBNAME }}
         run: dotnet test AspNetCore.Identity.CosmosDbCompat.Tests/AspNetCore.Identity.CosmosDbCompat.Tests.csproj --no-build -c Release --verbosity normal
