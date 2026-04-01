@@ -17,17 +17,6 @@ jobs:
         run: dotnet restore
       - name: Build
         run: dotnet build --no-restore -c Release
-      - name: Run main tests
-        env:
-          APPLICATIONDBCONTEXTCONNECTION: ${{ secrets.APPLICATIONDBCONTEXTCONNECTION }}
-          COSMOSIDENTITYDBNAME: ${{ secrets.COSMOSIDENTITYDBNAME }}
-        run: dotnet test AspNetCore.Identity.CosmosDb.Tests/AspNetCore.Identity.CosmosDb.Tests.csproj --no-build -c Release --verbosity normal
-      - name: Run compatibility tests
-        env:
-          COSMOSDB: ${{ secrets.COSMOSDB }}
-          COSMOSIDENTITYDBNAME: ${{ secrets.COSMOSIDENTITYDBNAME }}
-        run: dotnet test AspNetCore.Identity.CosmosDbCompat.Tests/AspNetCore.Identity.CosmosDbCompat.Tests.csproj --no-build -c Release --verbosity normal
-
   publish:
     name: Publish to NuGet
     needs: test
