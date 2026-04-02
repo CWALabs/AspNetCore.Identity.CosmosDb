@@ -6,13 +6,7 @@
 
 `AspNetCore.Identity.CosmosDb` provides ASP.NET Core Identity stores backed by the Entity Framework Core Azure Cosmos DB provider.
 
-The current package line targets `.NET 10` and Entity Framework Core 10.
-
-## Projects That Use This Library
-
-- [Cosmos CMS](https://cosmos.moonrise.net/) ([GitHub](https://github.com/MoonriseSoftwareCalifornia/CosmosCMS))
-
-If you would like your project listed here, open an issue or pull request.
+The current package line targets `.NET 10` and Entity Framework Core 
 
 ## Package Highlights
 
