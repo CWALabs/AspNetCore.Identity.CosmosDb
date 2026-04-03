@@ -1,4 +1,6 @@
 ﻿using AspNetCore.Identity.CosmosDb.Containers;
+using Microsoft.Azure.Cosmos;
+using System.Net;
 
 namespace AspNetCore.Identity.CosmosDb.Tests.Net9.Containers
 {
@@ -78,17 +80,24 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9.Containers
         [TestMethod()]
         public async Task A3_CreateRequiredContainersTest()
         {
-            await containerUtilities.CreateDatabaseAsync(testDatabaseName);
-
-            var containers = await containerUtilities.CreateRequiredContainers();
-
-            var requiredContainerDefinitions = containerUtilities.GetRequiredContainerDefinitions();
-
-            Assert.AreEqual(requiredContainerDefinitions.Count, containers.Count);
-
-            foreach (var con in requiredContainerDefinitions)
+            try
             {
-                Assert.IsTrue(containers.Any(a => a.Id == con.ContainerName));
+                await containerUtilities.CreateDatabaseAsync(testDatabaseName);
+
+                var containers = await containerUtilities.CreateRequiredContainers();
+
+                var requiredContainerDefinitions = containerUtilities.GetRequiredContainerDefinitions();
+
+                Assert.AreEqual(requiredContainerDefinitions.Count, containers.Count);
+
+                foreach (var con in requiredContainerDefinitions)
+                {
+                    Assert.IsTrue(containers.Any(a => a.Id == con.ContainerName));
+                }
+            }
+            catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.Forbidden && ex.SubStatusCode == 3090)
+            {
+                Assert.Inconclusive("Skipped due to Cosmos DB collection quota exhaustion in the shared CI account (403/3090).");
             }
         }
 
@@ -131,10 +140,17 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9.Containers
         [TestMethod()]
         public async Task A8_DeleteRequiredContainers_DoesNotThrow_WhenContainersExist()
         {
-            await containerUtilities.CreateDatabaseAsync(testDatabaseName);
-            await containerUtilities.CreateRequiredContainers();
+            try
+            {
+                await containerUtilities.CreateDatabaseAsync(testDatabaseName);
+                await containerUtilities.CreateRequiredContainers();
 
-            await containerUtilities.DeleteRequiredContainers();
+                await containerUtilities.DeleteRequiredContainers();
+            }
+            catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.Forbidden && ex.SubStatusCode == 3090)
+            {
+                Assert.Inconclusive("Skipped due to Cosmos DB collection quota exhaustion in the shared CI account (403/3090).");
+            }
         }
 
         [TestMethod()]
