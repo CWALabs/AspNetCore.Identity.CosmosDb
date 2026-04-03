@@ -882,11 +882,11 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9.Stores
         {
             using var userStore = _testUtilities.GetUserStore(connectionString, databaseName);
 
-            await Assert.ThrowsExceptionAsync<ArgumentNullException>(async () => await userStore.FindByEmailAsync(null));
-            await Assert.ThrowsExceptionAsync<ArgumentNullException>(async () => await userStore.FindByIdAsync(null));
-            await Assert.ThrowsExceptionAsync<ArgumentNullException>(async () => await userStore.FindByNameAsync(null));
-            await Assert.ThrowsExceptionAsync<ArgumentNullException>(async () => await userStore.CreateAsync(null));
-            await Assert.ThrowsExceptionAsync<ArgumentNullException>(async () => await userStore.DeleteAsync(null));
+            await Assert.ThrowsExactlyAsync<ArgumentNullException>(async () => await userStore.FindByEmailAsync(null));
+            await Assert.ThrowsExactlyAsync<ArgumentNullException>(async () => await userStore.FindByIdAsync(null));
+            await Assert.ThrowsExactlyAsync<ArgumentNullException>(async () => await userStore.FindByNameAsync(null));
+            await Assert.ThrowsExactlyAsync<ArgumentNullException>(async () => await userStore.CreateAsync(null));
+            await Assert.ThrowsExactlyAsync<ArgumentNullException>(async () => await userStore.DeleteAsync(null));
 
             var updateResult = await userStore.UpdateAsync(null);
             Assert.IsFalse(updateResult.Succeeded);
@@ -898,7 +898,7 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9.Stores
             using var userStore = _testUtilities.GetUserStore(connectionString, databaseName);
             var user = await GetMockRandomUserAsync(userStore);
 
-            await Assert.ThrowsExceptionAsync<InvalidOperationException>(async () =>
+            await Assert.ThrowsExactlyAsync<InvalidOperationException>(async () =>
                 await userStore.AddToRoleAsync(user, $"missing-{Guid.NewGuid():N}"));
         }
 
@@ -907,7 +907,7 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9.Stores
         {
             using var userStore = _testUtilities.GetUserStore(connectionString, databaseName);
 
-            await Assert.ThrowsExceptionAsync<ArgumentNullException>(async () =>
+            await Assert.ThrowsExactlyAsync<ArgumentNullException>(async () =>
                 await userStore.SetTokenAsync(null, "provider", "name", "value", default));
         }
 
@@ -916,7 +916,7 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9.Stores
         {
             using var userStore = _testUtilities.GetUserStore(connectionString, databaseName);
 
-            await Assert.ThrowsExceptionAsync<ArgumentNullException>(async () =>
+            await Assert.ThrowsExactlyAsync<ArgumentNullException>(async () =>
                 await userStore.FindByPasskeyIdAsync(null, default));
         }
 
@@ -926,7 +926,7 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9.Stores
             using var userStore = _testUtilities.GetUserStore(connectionString, databaseName);
             userStore.Dispose();
 
-            await Assert.ThrowsExceptionAsync<ObjectDisposedException>(async () =>
+            await Assert.ThrowsExactlyAsync<ObjectDisposedException>(async () =>
                 await userStore.GetRolesAsync(new IdentityUser()));
         }
     }

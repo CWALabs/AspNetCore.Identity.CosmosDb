@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "AspNetCore.Identity.CosmosDb Contributors",
+  "classifications": ["Web", "Identity", "Passkey", "CosmosDB", "Razor Pages"],
+  "identity": "AspNetCore.Identity.CosmosDb.PasskeyLogin.CSharp.1.0",
+  "name": "CosmosDB Passkey Login Page",
+  "shortName": "cosmos-passkeys-login",
+  "description": "Adds a passkey-enabled Login Razor Page (scaffolded Identity style) that works with AspNetCore.Identity.CosmosDb passkey endpoints. Drops into Areas/Identity/Pages/Account/. Requires AddCosmosPasskeyUiIntegration / MapCosmosPasskeyUiEndpoints to be registered in Program.cs.",
+  "tags": {
+    "language": "C#",
+    "type": "item"
+  },
+  "preferNameDirectory": false,
+  "symbols": {
+    "RootNamespace": {
+      "type": "parameter",
+      "description": "The root namespace of the target project (e.g. MyApp). Applied to the Areas.Identity.Pages.Account namespace.",
+      "datatype": "string",
+      "defaultValue": "MyApp",
+      "replaces": "AspNetCore.Identity.CosmosDb.Demo"
+    },
+    "UserType": {
+      "type": "parameter",
+      "description": "The Identity user type used by SignInManager (e.g. IdentityUser, ApplicationUser).",
+      "datatype": "string",
+      "defaultValue": "IdentityUser",
+      "replaces": "IdentityUser"
+    }
+  }
+}

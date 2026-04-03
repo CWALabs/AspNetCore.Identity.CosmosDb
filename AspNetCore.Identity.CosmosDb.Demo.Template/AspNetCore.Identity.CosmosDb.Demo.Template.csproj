@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <PackageType>Template</PackageType>
+    <PackageId>AspNetCore.Identity.CosmosDb.Demo.Template</PackageId>
+    <PackageVersion>12.0.0</PackageVersion>
+    <Version>12.0.0</Version>
+    <Title>AspNetCore.Identity.CosmosDb Demo App Template</Title>
+    <Description>.NET 10 dotnet new project template for a complete ASP.NET Core Identity + Azure Cosmos DB + passkeys demo application.</Description>
+    <Authors>AspNetCore.Identity.CosmosDb Contributors</Authors>
+    <PackageTags>aspnetcore;identity;cosmosdb;passkey;passkeys;webauthn;fido2;template;dotnetnew;demo;.NET10</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageProjectUrl>https://github.com/CWALabs/AspNetCore.Identity.CosmosDb</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/CWALabs/AspNetCore.Identity.CosmosDb</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <IncludeContentInPack>true</IncludeContentInPack>
+    <ContentTargetFolders>content</ContentTargetFolders>
+    <NoWarn>$(NoWarn);NU5128</NoWarn>
+    <FileVersion>12.0.0</FileVersion>
+    <AssemblyVersion>12.0.0</AssemblyVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="**\*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+    <Content Include="content\**\*" Exclude="content\**\bin\**;content\**\obj\**" Pack="true" PackagePath="content" />
+    <Content Include="..\AspNetCore.Identity.CosmosDb.Demo\**\*" Exclude="..\AspNetCore.Identity.CosmosDb.Demo\bin\**;..\AspNetCore.Identity.CosmosDb.Demo\obj\**;..\AspNetCore.Identity.CosmosDb.Demo\**\*.user" Pack="true" PackagePath="content\cosmos-identity-demo\" />
+  </ItemGroup>
+
+</Project>

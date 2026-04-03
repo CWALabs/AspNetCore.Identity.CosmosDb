@@ -1,86 +1,94 @@
-# Cosmos DB Provider for ASP.NET Core Identity
+# ASP.NET Core Identity Provider for Azure Cosmos DB
 
-[![CodeQL](https://github.com/MoonriseSoftwareCalifornia/AspNetCore.Identity.CosmosDb/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/MoonriseSoftwareCalifornia/AspNetCore.Identity.CosmosDb/actions/workflows/codeql-analysis.yml)
+[![CodeQL](https://github.com/CWALabs/AspNetCore.Identity.CosmosDb/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/CWALabs/AspNetCore.Identity.CosmosDb/actions/workflows/codeql-analysis.yml)
 [![Build and Test](https://github.com/CWALabs/AspNetCore.Identity.CosmosDb/actions/workflows/ci.yml/badge.svg)](https://github.com/CWALabs/AspNetCore.Identity.CosmosDb/actions/workflows/ci.yml)
+[![Coverage](https://codecov.io/gh/CWALabs/AspNetCore.Identity.CosmosDb/branch/main/graph/badge.svg)](https://codecov.io/gh/CWALabs/AspNetCore.Identity.CosmosDb)
 [![NuGet](https://img.shields.io/nuget/v/AspNetCore.Identity.CosmosDb.svg)](https://www.nuget.org/packages/AspNetCore.Identity.CosmosDb)
 
-`AspNetCore.Identity.CosmosDb` provides ASP.NET Core Identity stores backed by the Entity Framework Core Azure Cosmos DB provider.
+`AspNetCore.Identity.CosmosDb` is a Cosmos DB-backed implementation of ASP.NET Core Identity built on Entity Framework Core Cosmos. It gives ASP.NET Core applications a non-relational Identity store with support for users, roles, claims, tokens, external logins, and passkeys.
 
-The current package line targets `.NET 10` and Entity Framework Core 10.
+This repository is part of the [SkyCMS](https://github.com/CWALabs/SkyCMS) ecosystem and contains the core package, a runnable demo site, passkey page templates, and the test suites used to validate the library.
 
-## Projects That Use This Library
+## Repository Contents
 
-- [Cosmos CMS](https://cosmos.moonrise.net/) ([GitHub](https://github.com/MoonriseSoftwareCalifornia/CosmosCMS))
+- `AspNetCore.Identity.CosmosDb/`: the main library and NuGet package
+- `AspNetCore.Identity.CosmosDb.Demo/`: sample ASP.NET Core app showing the package in use
+- `AspNetCore.Identity.CosmosDb.Demo.Template/`: `dotnet new` project template for scaffolding the complete demo app
+- `AspNetCore.Identity.Razor.PassKeyPage/`: `dotnet new` templates for passkey login and passkey management pages
+- `AspNetCore.Identity.CosmosDb.Tests/`: primary automated test suite
+- `AspNetCore.Identity.CosmosDbCompat.Tests/`: API compatibility regression suite used during framework and package upgrades
+- `PASSKEY_DEVELOPER_GUIDE.md`: passkey integration guidance
 
-If you would like your project listed here, open an issue or pull request.
+## Packages
 
-## Package Highlights
+- [`AspNetCore.Identity.CosmosDb`](https://www.nuget.org/packages/AspNetCore.Identity.CosmosDb): main Identity provider package
+- [`AspNetCore.Identity.CosmosDb.Demo.Template`](https://www.nuget.org/packages/AspNetCore.Identity.CosmosDb.Demo.Template): full demo app `dotnet new` project template
+- [`AspNetCore.Identity.CosmosDb.Templates`](https://www.nuget.org/packages/AspNetCore.Identity.CosmosDb.Templates): Razor page templates for passkey UI integration
 
-- Uses Entity Framework Core Cosmos for user, role, claim, token, login, and passkey persistence
-- Supports generic keys
-- Supports LINQ queries through the standard Identity `Users` and `Roles` query surfaces
-- Preserves compatibility behavior needed for older EF Core Cosmos-backed databases
+## What The Library Does
 
-## Cosmos Container Layout
+- Persists ASP.NET Core Identity data in Azure Cosmos DB through EF Core Cosmos
+- Implements the standard ASP.NET Core Identity store abstractions for `UserManager<TUser>` and `RoleManager<TRole>`
+- Supports generic key types
+- Adds passkey / WebAuthn persistence through `IUserPasskeyStore<TUser>`
+- Provides reusable passkey API endpoints and packaged browser-side JavaScript
+- Supports older Cosmos-backed Identity databases through backward-compatibility mode
 
-This package uses eight Cosmos containers.
+## Requirements
 
-If throughput is provisioned at the container level, this can increase the minimum RU requirement for the account. To reduce cost, prefer shared database-level throughput and evaluate autoscale when appropriate.
+- .NET 10
+- Azure Cosmos DB or the [Azure Cosmos DB Emulator](https://learn.microsoft.com/azure/cosmos-db/emulator)
+- ASP.NET Core Identity
 
-- [Database throughput guidance](https://learn.microsoft.com/en-us/azure/cosmos-db/nosql/how-to-provision-database-throughput?tabs=dotnetv2#provision-throughput-using-azure-portal)
-- [Autoscale throughput guidance](https://learn.microsoft.com/en-us/azure/cosmos-db/provision-throughput-autoscale)
+## Install In An ASP.NET Core MVC Or Razor Pages App
 
-The required containers include support for user passkeys in addition to the standard Identity entities.
+The registration is the same for MVC and Razor Pages. The only difference is whether you add `AddControllersWithViews()` or `AddRazorPages()` and how you map routes.
 
-## Installation
-
-Install the NuGet package:
+### 1. Install the package
 
 ```powershell
 Install-Package AspNetCore.Identity.CosmosDb
 ```
 
-Create an Azure Cosmos DB account and choose a throughput model that matches your workload. For development and test scenarios, free tier or serverless is usually the simplest starting point.
+or:
 
-## Application Configuration
+```powershell
+dotnet add package AspNetCore.Identity.CosmosDb
+```
 
-An example `secrets.json` file:
+### 2. Add configuration
 
 ```json
 {
-  "SetupCosmosDb": "true",
-  "CosmosIdentityDbName": "YourDatabaseName",
   "ConnectionStrings": {
-  "ApplicationDbContextConnection": "AccountEndpoint=...;AccountKey=...;"
+    "CosmosDb": "AccountEndpoint=https://<account>.documents.azure.com:443/;AccountKey=<key>;"
+  },
+  "CosmosDb": {
+    "DatabaseName": "MyIdentityDb"
+  },
+  "Passkeys": {
+    "ServerDomain": "localhost"
   }
 }
 ```
 
-`SetupCosmosDb` is intended for initial provisioning. Remove or disable it after the database and containers have been created to avoid unnecessary startup work.
-
-## DbContext Setup
-
-Inherit from `CosmosIdentityDbContext<TUser, TRole, TKey>`:
+### 3. Create a DbContext
 
 ```csharp
+using AspNetCore.Identity.CosmosDb;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
-namespace AspNetCore.Identity.CosmosDb.Example.Data
+public class ApplicationDbContext : CosmosIdentityDbContext<IdentityUser, IdentityRole, string>
 {
-  public class ApplicationDbContext : CosmosIdentityDbContext<IdentityUser, IdentityRole, string>
-  {
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-      : base(options)
+        : base(options)
     {
     }
-  }
 }
 ```
 
-## Program.cs Setup
-
-Typical registration looks like this:
+### 4. Register services in Program.cs
 
 ```csharp
 using AspNetCore.Identity.CosmosDb;
@@ -88,219 +96,147 @@ using AspNetCore.Identity.CosmosDb.Extensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
-var connectionString = builder.Configuration.GetConnectionString("ApplicationDbContextConnection");
-var cosmosIdentityDbName = builder.Configuration.GetValue<string>("CosmosIdentityDbName");
-var setupCosmosDb = builder.Configuration.GetValue<bool>("SetupCosmosDb");
+var builder = WebApplication.CreateBuilder(args);
+
+var connectionString = builder.Configuration.GetConnectionString("CosmosDb")!;
+var databaseName = builder.Configuration["CosmosDb:DatabaseName"]!;
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-  options.UseCosmos(connectionString!, cosmosIdentityDbName!));
+    options.UseCosmos(connectionString, databaseName));
+
+builder.Services.Configure<IdentityPasskeyOptions>(options =>
+{
+    options.ServerDomain = builder.Configuration["Passkeys:ServerDomain"]!;
+});
 
 builder.Services
-  .AddCosmosIdentity<ApplicationDbContext, IdentityUser, IdentityRole, string>(options =>
-  {
-    options.SignIn.RequireConfirmedAccount = true;
-  })
-  .AddDefaultUI()
-  .AddDefaultTokenProviders();
+    .AddCosmosIdentity<ApplicationDbContext, IdentityUser, IdentityRole, string>(options =>
+    {
+        options.User.RequireUniqueEmail = true;
+        options.SignIn.RequireConfirmedAccount = true;
+    })
+    .AddDefaultTokenProviders()
+    .AddDefaultUI();
+
+builder.Services.AddRazorPages();
+// builder.Services.AddControllersWithViews();
 ```
 
-If you want the application to provision the Cosmos database and required containers during initial startup:
+### 5. Ensure the database and containers exist
 
 ```csharp
-if (setupCosmosDb)
-{
-  var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
-  optionsBuilder.UseCosmos(connectionString!, cosmosIdentityDbName!);
+var app = builder.Build();
 
-  using var dbContext = new ApplicationDbContext(optionsBuilder.Options);
-  dbContext.Database.EnsureCreated();
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    await db.Database.EnsureCreatedAsync();
 }
 ```
 
-## Repository Guidance
+### 6. Configure the ASP.NET Core pipeline
 
-The internal repository abstraction still exposes a small set of synchronous members for compatibility with older callers, but Cosmos-backed execution should prefer asynchronous APIs. New code should use the async repository members.
+```csharp
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+app.UseRouting();
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapRazorPages();
+// app.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
+
+app.Run();
+```
 
 ## Passkey Support
 
-Passkey persistence is part of the required Cosmos setup for current versions of this package. If your application uses ASP.NET Core Identity passkeys, ensure the database and containers have been provisioned with the current model before enabling the feature in production.
+The package includes passkey support for .NET 10 ASP.NET Core Identity.
 
-## Backward Compatibility For Older EF Core Cosmos Databases
-
-Entity Framework Core 9 changed important Cosmos behaviors that affect existing Identity databases.
-
-### Discriminator In JSON IDs
-
-This package applies `HasDiscriminatorInJsonIds()` so that generated Cosmos IDs continue to include the entity discriminator.
-
-### Embedded Discriminator Name
-
-Older databases may use `Discriminator` instead of `$type` for the embedded discriminator name. To read those databases, construct your context with `backwardCompatibility: true`.
-
-Example:
+### Register the passkey endpoints and client script
 
 ```csharp
-var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
-optionsBuilder.UseCosmos(connectionString, databaseName);
+builder.Services.AddCosmosPasskeyUiIntegration(options =>
+{
+    options.RoutePrefix = "/identity/passkeys";
+    options.ClientScriptPath = "/identity/passkeys/client.js";
+    options.RequireAntiforgery = true;
+    options.MaxPasskeysPerUser = 100;
+    options.MaxPasskeyNameLength = 200;
+});
 
+app.MapCosmosPasskeyUiEndpoints<IdentityUser>();
+```
+
+### Scaffold the passkey UI pages
+
+Install the templates package:
+
+```powershell
+dotnet new install AspNetCore.Identity.CosmosDb.Templates
+```
+
+Then scaffold the pages:
+
+```powershell
+dotnet new cosmos-passkeys-login --RootNamespace MyApp --UserType IdentityUser
+dotnet new cosmos-passkeys-ui --RootNamespace MyApp
+```
+
+The templates package is provider-agnostic at the page-model level and is documented in [AspNetCore.Identity.Razor.PassKeyPage/README.md](AspNetCore.Identity.Razor.PassKeyPage/README.md).
+
+## Demo Website
+
+The repository includes [AspNetCore.Identity.CosmosDb.Demo](AspNetCore.Identity.CosmosDb.Demo), a runnable example that shows how to configure the package, provision Cosmos DB, and use the passkey integration end to end.
+
+If you want the demo **without cloning this repository**, two options are available:
+
+- Install and scaffold the full demo app template package:
+
+```powershell
+dotnet new install AspNetCore.Identity.CosmosDb.Demo.Template
+dotnet new cosmos-identity-demo -n MyIdentityCosmosDemo
+```
+
+- Download `AspNetCore.Identity.CosmosDb.Demo-source.zip` from the latest GitHub Release assets (created by [.github/workflows/demo-package.yml](.github/workflows/demo-package.yml)).
+
+The demo README includes setup instructions, API usage notes, and page screenshots for the home, login, and passkey management flows: [AspNetCore.Identity.CosmosDb.Demo/README.md](AspNetCore.Identity.CosmosDb.Demo/README.md).
+
+### Demo Screenshots
+
+#### Home (`HomeController.Index()` -> `Views/Home/Index.cshtml`)
+
+![Home page screenshot](AspNetCore.Identity.CosmosDb.Demo/wwwroot/images/Index_cshtml.png)
+
+#### Login (`Areas/Identity/Pages/Account/Login.cshtml`)
+
+![Login page screenshot](AspNetCore.Identity.CosmosDb.Demo/wwwroot/images/Login_cshtml.png)
+
+#### Passkeys (`Pages/Passkeys.cshtml`)
+
+![Passkeys page screenshot](AspNetCore.Identity.CosmosDb.Demo/wwwroot/images/Passkeys_cshtml.png)
+
+## Backward Compatibility
+
+Older EF Core Cosmos databases can be read by constructing the context with `backwardCompatibility: true` when needed.
+
+```csharp
 using var dbContext = new ApplicationDbContext(optionsBuilder.Options, backwardCompatibility: true);
 ```
 
-### Index Definitions
+This is primarily for databases created before EF Core Cosmos discriminator behavior changed in EF Core 9.
 
-EF Core Cosmos no longer ignores index configuration in the same way as earlier releases. If your model still defines index configuration inherited from relational assumptions, remove that configuration rather than relying on it being ignored.
+## Additional Documentation
 
-## Upgrading From Version 2.x To 8.x+
+- [AspNetCore.Identity.CosmosDb/README.md](AspNetCore.Identity.CosmosDb/README.md)
+- [AspNetCore.Identity.CosmosDb.Demo/README.md](AspNetCore.Identity.CosmosDb.Demo/README.md)
+- [AspNetCore.Identity.CosmosDb.Demo.Template/README.md](AspNetCore.Identity.CosmosDb.Demo.Template/README.md)
+- [AspNetCore.Identity.CosmosDb.Tests/README.md](AspNetCore.Identity.CosmosDb.Tests/README.md)
+- [AspNetCore.Identity.CosmosDbCompat.Tests/README.md](AspNetCore.Identity.CosmosDbCompat.Tests/README.md)
+- [PASSKEY_DEVELOPER_GUIDE.md](PASSKEY_DEVELOPER_GUIDE.md)
+- [PASSKEY_IMPLEMENTATION_STATUS.md](PASSKEY_IMPLEMENTATION_STATUS.md)
+- [AspNetCore.Identity.Razor.PassKeyPage/README.md](AspNetCore.Identity.Razor.PassKeyPage/README.md)
 
-If you are upgrading older applications, the `CosmosIdentityDbContext` and `AddCosmosIdentity` registrations now require the key type.
+## License
 
-Old form:
-
-```csharp
-public class ApplicationDbContext : CosmosIdentityDbContext<IdentityUser, IdentityRole>
-```
-
-Current form:
-
-```csharp
-public class ApplicationDbContext : CosmosIdentityDbContext<IdentityUser, IdentityRole, string>
-```
-
-Old form:
-
-```csharp
-builder.Services.AddCosmosIdentity<ApplicationDbContext, IdentityUser, IdentityRole>()
-```
-
-Current form:
-
-```csharp
-builder.Services.AddCosmosIdentity<ApplicationDbContext, IdentityUser, IdentityRole, string>()
-```
-
-## External Authentication Providers
-
-This library works with external authentication providers. Example packages:
-
-- [Microsoft.AspNetCore.Authentication.Google](https://www.nuget.org/packages/Microsoft.AspNetCore.Authentication.Google)
-- [Microsoft.AspNetCore.Authentication.MicrosoftAccount](https://www.nuget.org/packages/Microsoft.AspNetCore.Authentication.MicrosoftAccount)
-
-Example registration:
-
-```csharp
-var googleClientId = builder.Configuration["Authentication:Google:ClientId"];
-var googleClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
-
-if (!string.IsNullOrEmpty(googleClientId) && !string.IsNullOrEmpty(googleClientSecret))
-{
-  builder.Services.AddAuthentication().AddGoogle(options =>
-  {
-    options.ClientId = googleClientId;
-    options.ClientSecret = googleClientSecret;
-  });
-}
-
-var microsoftClientId = builder.Configuration["Authentication:Microsoft:ClientId"];
-var microsoftClientSecret = builder.Configuration["Authentication:Microsoft:ClientSecret"];
-
-if (!string.IsNullOrEmpty(microsoftClientId) && !string.IsNullOrEmpty(microsoftClientSecret))
-{
-  builder.Services.AddAuthentication().AddMicrosoftAccount(options =>
-  {
-    options.ClientId = microsoftClientId;
-    options.ClientSecret = microsoftClientSecret;
-  });
-}
-```
-
-See the current ASP.NET Core authentication documentation for the latest guidance on external login providers.
-
-## Querying Users And Roles
-
-Both the user and role stores support LINQ queries through Entity Framework Core.
-
-```csharp
-var userResults = userManager.Users.Where(u => u.Email!.StartsWith("bob"));
-var roleResults = roleManager.Roles.Where(r => r.Name!.Contains("water"));
-```
-
-For provider-specific LINQ limitations, see the Azure Cosmos DB LINQ documentation:
-
-- [Supported LINQ operations](https://learn.microsoft.com/en-us/azure/cosmos-db/nosql/query/linq-to-sql)
-
-## Tests
-
-The automated tests use Cosmos-backed execution paths.
-
-Current local test configuration:
-
-```json
-{
-  "ApplicationDbContextConnection": "AccountEndpoint=...;AccountKey=...;",
-  "CosmosIdentityDbName": "localtests"
-}
-```
-
-The test suites create unique database names during execution to avoid destructive interference between runs.
-
-## Example Application
-
-For a larger application using this package, see Cosmos CMS:
-
-- [Program.cs example](https://github.com/MoonriseSoftwareCalifornia/CosmosCMS/blob/main/Editor/Program.cs)
-- [Cosmos CMS repository](https://github.com/MoonriseSoftwareCalifornia/CosmosCMS/tree/main)
-
-## Bugs And Support
-
-If you find a bug, open a GitHub issue with a minimal repro when possible.
-
-- [GitHub issues](https://github.com/MoonriseSoftwareCalifornia/AspNetCore.Identity.CosmosDb/issues)
-- [NuGet package](https://www.nuget.org/packages/AspNetCore.Identity.CosmosDb)
-
-## Changelog
-
-This changelog lists notable changes beyond routine package dependency updates.
-
-### 10.0.5.1
-
-- Updated the package to .NET 10 and Entity Framework Core 10.
-- Added explicit passkey container support to setup guidance and infrastructure.
-- Added async-first repository guidance while retaining compatibility wrappers for synchronous callers.
-
-### 9.0.1.0
-
-- Removed the old bundled sample application.
-- Pointed users to Cosmos CMS as a maintained example application.
-
-### 9.0.0.3
-
-- Added backward compatibility support for databases created with EF Core 8 or earlier.
-- Added tests covering backward compatibility behavior.
-
-### 9.0.0.1
-
-- Updated the package for .NET 9 and Entity Framework Core 9.
-
-### 2.0.5.1
-
-- Added IQueryable support for user and role stores.
-
-### 2.0.1.0
-
-- Added an example web project.
-
-### 2.0.0-alpha
-
-- Forked from [pierodetomi/efcore-identity-cosmos](https://github.com/pierodetomi/efcore-identity-cosmos).
-- Refactored the package for .NET 6.
-- Added `UserStore`, `RoleStore`, `UserManager`, and `RoleManager` tests.
-- Renamed the package namespace to `AspNetCore.Identity.CosmosDb`.
-- Implemented `IUserLockoutStore<TUser>`.
-
-### 1.0.5
-
-- Added `IUserPhoneNumberStore<TUser>` support.
-
-### 1.0.4
-
-- Added `IUserEmailStore<TUser>` support.
+[MIT](LICENSE)

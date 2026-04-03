@@ -7,6 +7,10 @@ on:
   #   branches: [ "main", "master" ]
   workflow_dispatch:
 
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
   build-and-test:
     name: Build and Test
@@ -26,14 +30,51 @@ jobs:
       - name: Build
         run: dotnet build --no-restore -c Release
 
+      - name: Install coverage tools
+        run: |
+          dotnet tool install --global dotnet-coverage
+          dotnet tool install --global dotnet-reportgenerator-globaltool
+          echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
+
       - name: Run main tests
         env:
           APPLICATIONDBCONTEXTCONNECTION: ${{ secrets.APPLICATIONDBCONTEXTCONNECTION }}
           COSMOSIDENTITYDBNAME: ${{ secrets.COSMOSIDENTITYDBNAME }}
-        run: dotnet test AspNetCore.Identity.CosmosDb.Tests/AspNetCore.Identity.CosmosDb.Tests.csproj --no-build -c Release --verbosity normal
+        run: |
+          mkdir -p TestResults
+          dotnet-coverage collect "dotnet test AspNetCore.Identity.CosmosDb.Tests/AspNetCore.Identity.CosmosDb.Tests.csproj --no-build -c Release --verbosity normal" -f cobertura -o ./TestResults/main-coverage.cobertura.xml
 
       - name: Run compatibility tests
         env:
           APPLICATIONDBCONTEXTCONNECTION: ${{ secrets.APPLICATIONDBCONTEXTCONNECTION }}
           COSMOSIDENTITYDBNAME: ${{ secrets.COSMOSIDENTITYDBNAME }}
-        run: dotnet test AspNetCore.Identity.CosmosDbCompat.Tests/AspNetCore.Identity.CosmosDbCompat.Tests.csproj --no-build -c Release --verbosity normal
+        run: |
+          dotnet-coverage collect "dotnet test AspNetCore.Identity.CosmosDbCompat.Tests/AspNetCore.Identity.CosmosDbCompat.Tests.csproj --no-build -c Release --verbosity normal" -f cobertura -o ./TestResults/compat-coverage.cobertura.xml
+
+      - name: Generate merged coverage report and badge assets
+        run: |
+          reportgenerator "-reports:TestResults/*-coverage.cobertura.xml" "-targetdir:TestResults/CoverageReport" "-reporttypes:Cobertura;MarkdownSummaryGithub;Badges"
+
+      - name: Publish coverage summary
+        if: always()
+        run: |
+          if [ -f "TestResults/CoverageReport/SummaryGithub.md" ]; then
+            cat TestResults/CoverageReport/SummaryGithub.md >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Upload coverage artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: |
+            TestResults/*-coverage.cobertura.xml
+            TestResults/CoverageReport/**
+
+      - name: Upload to Codecov
+        if: always()
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./TestResults/CoverageReport/Cobertura.xml
+          fail_ci_if_error: false
+          verbose: true

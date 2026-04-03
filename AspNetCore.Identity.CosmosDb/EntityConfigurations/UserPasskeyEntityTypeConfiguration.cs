@@ -31,6 +31,10 @@ namespace AspNetCore.Identity.CosmosDb.EntityConfigurations
                     v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null),
                     v => JsonSerializer.Deserialize<IdentityPasskeyData>(v, (JsonSerializerOptions)null));
 
+            // Note: CredentialIdHash is automatically populated in IdentityPasskeyData during add/update operations
+            // Cosmos DB will index the nested Data property, making hash-based lookups efficient.
+            // The hash enables faster credential ID searches without scanning all passkeys.
+
             builder.ToContainer(_tableName);
         }
     }

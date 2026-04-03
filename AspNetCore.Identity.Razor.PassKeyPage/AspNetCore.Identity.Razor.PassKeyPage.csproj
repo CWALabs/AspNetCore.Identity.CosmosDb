@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageType>Template</PackageType>
+	<TargetFramework>net10.0</TargetFramework>
+    <PackageId>AspNetCore.Identity.CosmosDb.Templates</PackageId>
+    <PackageVersion>12.0.0</PackageVersion>
+    <Title>AspNetCore.Identity.CosmosDb Templates</Title>
+  <Description>.NET 10 dotnet new templates for passkey-enabled ASP.NET Core Identity login and passkey management Razor Pages. Works with any Identity provider that supports passkeys and compatible endpoints.</Description>
+    <Authors>AspNetCore.Identity.CosmosDb Contributors</Authors>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  <PackageTags>aspnetcore;identity;passkey;passkeys;webauthn;fido2;template;templates;razorpages;dotnetnew;.NET10</PackageTags>
+    <IncludeContentInPack>true</IncludeContentInPack>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <ContentTargetFolders>content</ContentTargetFolders>
+    <NoWarn>$(NoWarn);NU5128</NoWarn>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageProjectUrl>https://github.com/CWALabs/AspNetCore.Identity.CosmosDb</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/CWALabs/AspNetCore.Identity.CosmosDb</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <Version>12.0.0</Version>
+    <FileVersion>12.0.0</FileVersion>
+    <AssemblyVersion>12.0.0</AssemblyVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Exclude template source files from compilation — they are content, not project code -->
+    <Compile Remove="content\**\*" />
+    <Content Include="content\**\*" Exclude="content\**\bin\**;content\**\obj\**" Pack="true" PackagePath="content" />
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+</Project>

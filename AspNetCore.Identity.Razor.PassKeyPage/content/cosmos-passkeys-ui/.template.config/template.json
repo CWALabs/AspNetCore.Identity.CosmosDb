@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "AspNetCore.Identity.CosmosDb Contributors",
+  "classifications": ["Web", "Identity", "Passkey", "CosmosDB", "Razor Pages"],
+  "identity": "AspNetCore.Identity.CosmosDb.PasskeyUI.CSharp.1.0",
+  "name": "CosmosDB Passkey Management Page",
+  "shortName": "cosmos-passkeys-ui",
+  "description": "Adds a Razor Pages passkey management page that works with AspNetCore.Identity.CosmosDb passkey endpoints. Requires AddCosmosPasskeyUiIntegration / MapCosmosPasskeyUiEndpoints to be registered in Program.cs.",
+  "tags": {
+    "language": "C#",
+    "type": "item"
+  },
+  "preferNameDirectory": false,
+  "symbols": {
+    "RootNamespace": {
+      "type": "parameter",
+      "description": "The root namespace of the target project (e.g. MyApp). Applied to the Pages namespace.",
+      "datatype": "string",
+      "defaultValue": "MyApp",
+      "replaces": "AspNetCore.Identity.CosmosDb.Demo"
+    }
+  }
+}

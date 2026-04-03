@@ -9,6 +9,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspNetCore.Identity.CosmosD
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspNetCore.Identity.CosmosDb.Tests", "AspNetCore.Identity.CosmosDb.Tests\AspNetCore.Identity.CosmosDb.Tests.csproj", "{731D4DB9-D4AD-2D62-883F-1D0A67BBFAA7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspNetCore.Identity.CosmosDb.Demo", "AspNetCore.Identity.CosmosDb.Demo\AspNetCore.Identity.CosmosDb.Demo.csproj", "{3454DA17-0D6C-6A91-E04B-462D386FA24E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspNetCore.Identity.Razor.PassKeyPage", "AspNetCore.Identity.Razor.PassKeyPage\AspNetCore.Identity.Razor.PassKeyPage.csproj", "{C30BACF1-F6EA-756B-6031-D663A02683C9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspNetCore.Identity.CosmosDb.Demo.Template", "AspNetCore.Identity.CosmosDb.Demo.Template\AspNetCore.Identity.CosmosDb.Demo.Template.csproj", "{A6D74D4B-6EE9-4E9E-AE5D-438C3A2A9F3B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +33,18 @@ Global
 		{731D4DB9-D4AD-2D62-883F-1D0A67BBFAA7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{731D4DB9-D4AD-2D62-883F-1D0A67BBFAA7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{731D4DB9-D4AD-2D62-883F-1D0A67BBFAA7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3454DA17-0D6C-6A91-E04B-462D386FA24E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3454DA17-0D6C-6A91-E04B-462D386FA24E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3454DA17-0D6C-6A91-E04B-462D386FA24E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3454DA17-0D6C-6A91-E04B-462D386FA24E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C30BACF1-F6EA-756B-6031-D663A02683C9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C30BACF1-F6EA-756B-6031-D663A02683C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C30BACF1-F6EA-756B-6031-D663A02683C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C30BACF1-F6EA-756B-6031-D663A02683C9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A6D74D4B-6EE9-4E9E-AE5D-438C3A2A9F3B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A6D74D4B-6EE9-4E9E-AE5D-438C3A2A9F3B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A6D74D4B-6EE9-4E9E-AE5D-438C3A2A9F3B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A6D74D4B-6EE9-4E9E-AE5D-438C3A2A9F3B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

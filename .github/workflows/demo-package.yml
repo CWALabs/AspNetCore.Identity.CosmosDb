@@ -1,0 +1,55 @@
+name: Package Demo App
+
+on:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  package-demo:
+    name: Package Demo Source ZIP
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore demo app
+        run: dotnet restore AspNetCore.Identity.CosmosDb.Demo/AspNetCore.Identity.CosmosDb.Demo.csproj
+
+      - name: Build demo app
+        run: dotnet build AspNetCore.Identity.CosmosDb.Demo/AspNetCore.Identity.CosmosDb.Demo.csproj -c Release --no-restore
+
+      - name: Stage source package
+        run: |
+          mkdir -p dist/AspNetCore.Identity.CosmosDb.Demo
+          rsync -av --delete \
+            --exclude "bin" \
+            --exclude "obj" \
+            --exclude "*.user" \
+            AspNetCore.Identity.CosmosDb.Demo/ dist/AspNetCore.Identity.CosmosDb.Demo/
+          cp LICENSE dist/AspNetCore.Identity.CosmosDb.Demo/
+
+      - name: Create demo source zip
+        run: |
+          cd dist
+          zip -r AspNetCore.Identity.CosmosDb.Demo-source.zip AspNetCore.Identity.CosmosDb.Demo
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: demo-source-package
+          path: dist/AspNetCore.Identity.CosmosDb.Demo-source.zip
+
+      - name: Attach zip to release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/AspNetCore.Identity.CosmosDb.Demo-source.zip

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -37,6 +38,10 @@ namespace AspNetCore.Identity.CosmosDb.Stores
         private const string InternalLoginProvider = "[AspNetUserStore]";
         private const string AuthenticatorKeyTokenName = "AuthenticatorKey";
         private const string RecoveryCodeTokenName = "RecoveryCodes";
+
+        // Semaphore slims for per-user concurrency control on passkey operations
+        private readonly ConcurrentDictionary<TKey, SemaphoreSlim> _passkeySemaphores =
+            new ConcurrentDictionary<TKey, SemaphoreSlim>();
 
         public IQueryable<TUserEntity> Users => (IQueryable<TUserEntity>)_repo.Users;
 
@@ -679,6 +684,14 @@ namespace AspNetCore.Identity.CosmosDb.Stores
                 .ToListAsync(cancellationToken);
         }
 
+        /// <summary>
+        /// Adds or updates a passkey for the specified user. If a passkey with the same credential ID exists, it is updated; otherwise, a new passkey is created.
+        /// </summary>
+        /// <param name="user">The user to add or update the passkey for.</param>
+        /// <param name="passkey">The passkey information to add or update.</param>
+        /// <param name="cancellationToken">The <see cref="CancellationToken"/> used to propagate notifications that the operation should be canceled.</param>
+        /// <returns>The <see cref="Task"/> that represents the asynchronous operation.</returns>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="user"/> or <paramref name="passkey"/> is null.</exception>
         public async Task AddOrUpdatePasskeyAsync(TUserEntity user, UserPasskeyInfo passkey, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -687,31 +700,47 @@ namespace AspNetCore.Identity.CosmosDb.Stores
             if (user == null) throw new ArgumentNullException(nameof(user));
             if (passkey == null) throw new ArgumentNullException(nameof(passkey));
 
-            var data = ToIdentityPasskeyData(passkey);
-
-            var existingPasskeys = await GetUserPasskeysInternalAsync(user.Id, cancellationToken);
-
-            var entity = existingPasskeys
-                .SingleOrDefault(_ => _.CredentialId != null && _.CredentialId.SequenceEqual(passkey.CredentialId));
-
-            if (entity == null)
+            var semaphore = GetOrCreatePasskeySemaphore(user.Id);
+            await semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+            try
             {
-                _repo.Add(new IdentityUserPasskey<TKey>
+                var data = ToIdentityPasskeyData(passkey);
+
+                var existingPasskeys = await GetUserPasskeysInternalAsync(user.Id, cancellationToken).ConfigureAwait(false);
+
+                var entity = existingPasskeys
+                    .SingleOrDefault(_ => _.CredentialId != null && _.CredentialId.SequenceEqual(passkey.CredentialId));
+
+                if (entity == null)
                 {
-                    UserId = user.Id,
-                    CredentialId = passkey.CredentialId,
-                    Data = data,
-                });
-            }
-            else
-            {
-                entity.Data = data;
-                _repo.Update(entity);
-            }
+                    _repo.Add(new IdentityUserPasskey<TKey>
+                    {
+                        UserId = user.Id,
+                        CredentialId = passkey.CredentialId,
+                        Data = data,
+                    });
+                }
+                else
+                {
+                    entity.Data = data;
+                    _repo.Update(entity);
+                }
 
-            await _repo.SaveChangesAsync();
+                await _repo.SaveChangesAsync().ConfigureAwait(false);
+            }
+            finally
+            {
+                semaphore.Release();
+            }
         }
 
+        /// <summary>
+        /// Gets all passkeys registered for the specified user.
+        /// </summary>
+        /// <param name="user">The user to retrieve passkeys for.</param>
+        /// <param name="cancellationToken">The <see cref="CancellationToken"/> used to propagate notifications that the operation should be canceled.</param>
+        /// <returns>A <see cref="Task"/> that represents the asynchronous operation, containing a list of <see cref="UserPasskeyInfo"/> objects for the user, or an empty list if no passkeys exist.</returns>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="user"/> is null.</exception>
         public async Task<IList<UserPasskeyInfo>> GetPasskeysAsync(TUserEntity user, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -719,11 +748,20 @@ namespace AspNetCore.Identity.CosmosDb.Stores
 
             if (user == null) throw new ArgumentNullException(nameof(user));
 
-            var entities = await GetUserPasskeysInternalAsync(user.Id, cancellationToken);
+            var semaphore = GetOrCreatePasskeySemaphore(user.Id);
+            await semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+            try
+            {
+                var entities = await GetUserPasskeysInternalAsync(user.Id, cancellationToken).ConfigureAwait(false);
 
-            return entities
-                .Select(_ => ToUserPasskeyInfo(_.CredentialId, _.Data))
-                .ToList();
+                return entities
+                    .Select(_ => ToUserPasskeyInfo(_.CredentialId, _.Data))
+                    .ToList();
+            }
+            finally
+            {
+                semaphore.Release();
+            }
         }
 
         private async Task<List<IdentityUserPasskey<TKey>>> GetUserPasskeysInternalAsync(TKey userId,
@@ -731,9 +769,26 @@ namespace AspNetCore.Identity.CosmosDb.Stores
         {
             return await _repo.Table<IdentityUserPasskey<TKey>>()
                 .Where(_ => _.UserId.Equals(userId))
-                .ToListAsync(cancellationToken);
+                .ToListAsync(cancellationToken).ConfigureAwait(false);
         }
 
+        private SemaphoreSlim GetOrCreatePasskeySemaphore(TKey userId)
+        {
+            return _passkeySemaphores.GetOrAdd(userId, _ => new SemaphoreSlim(1, 1));
+        }
+
+        /// <summary>
+        /// Finds a user by their passkey credential ID.
+        /// </summary>
+        /// <param name="credentialId">The credential ID of the passkey to search for.</param>
+        /// <param name="cancellationToken">The <see cref="CancellationToken"/> used to propagate notifications that the operation should be canceled.</param>
+        /// <returns>A <see cref="Task"/> that represents the asynchronous operation, containing the user associated with the passkey credential ID, or null if not found.</returns>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="credentialId"/> is null.</exception>
+        /// <remarks>
+        /// Performance note: This method queries Cosmos DB for all passkeys and filters in-memory.
+        /// For systems with many passkeys, consider implementing a custom IdentityPasskeyData class with a CredentialIdHash index.
+        /// See PASSKEY_READINESS_ASSESSMENT.md for optimization guidance.
+        /// </remarks>
         public async Task<TUserEntity> FindByPasskeyIdAsync(byte[] credentialId, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -741,8 +796,12 @@ namespace AspNetCore.Identity.CosmosDb.Stores
 
             if (credentialId == null) throw new ArgumentNullException(nameof(credentialId));
 
+            // Performance: Load all passkeys and search in memory.
+            // Limitation: Not partition-optimized (searches across all passkeys).
+            // Note: The framework's IdentityPasskeyData class does not support custom index fields.
+            // Future optimization: Create a custom IdentityPasskeyData subclass with CredentialIdHash for indexed lookups.
             var passkey = (await _repo.Table<IdentityUserPasskey<TKey>>()
-                    .ToListAsync(cancellationToken))
+                    .ToListAsync(cancellationToken).ConfigureAwait(false))
                 .SingleOrDefault(_ => _.CredentialId != null && _.CredentialId.SequenceEqual(credentialId));
 
             if (passkey == null)
@@ -750,15 +809,23 @@ namespace AspNetCore.Identity.CosmosDb.Stores
                 return default;
             }
 
-            return await FindUserByIdInternalAsync(passkey.UserId, cancellationToken);
+            return await FindUserByIdInternalAsync(passkey.UserId, cancellationToken).ConfigureAwait(false);
         }
 
         private async Task<TUserEntity> FindUserByIdInternalAsync(TKey userId, CancellationToken cancellationToken)
         {
             return await _repo.Table<TUserEntity>()
-                .SingleOrDefaultAsync(_ => _.Id.Equals(userId), cancellationToken);
+                .SingleOrDefaultAsync(_ => _.Id.Equals(userId), cancellationToken).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Finds a passkey for a user by credential ID.
+        /// </summary>
+        /// <param name="user">The user to search passkeys for.</param>
+        /// <param name="credentialId">The credential ID of the passkey to find.</param>
+        /// <param name="cancellationToken">The <see cref="CancellationToken"/> used to propagate notifications that the operation should be canceled.</param>
+        /// <returns>A <see cref="Task"/> that represents the asynchronous operation, containing the passkey information if found, or null otherwise.</returns>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="user"/> or <paramref name="credentialId"/> is null.</exception>
         public async Task<UserPasskeyInfo> FindPasskeyAsync(TUserEntity user, byte[] credentialId, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -767,16 +834,33 @@ namespace AspNetCore.Identity.CosmosDb.Stores
             if (user == null) throw new ArgumentNullException(nameof(user));
             if (credentialId == null) throw new ArgumentNullException(nameof(credentialId));
 
-            var passkeys = await GetUserPasskeysInternalAsync(user.Id, cancellationToken);
+            var semaphore = GetOrCreatePasskeySemaphore(user.Id);
+            await semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+            try
+            {
+                var passkeys = await GetUserPasskeysInternalAsync(user.Id, cancellationToken).ConfigureAwait(false);
 
-            var passkey = passkeys
-                .SingleOrDefault(_ => _.CredentialId != null && _.CredentialId.SequenceEqual(credentialId));
+                var passkey = passkeys
+                    .SingleOrDefault(_ => _.CredentialId != null && _.CredentialId.SequenceEqual(credentialId));
 
-            return passkey == null
-                ? null
-                : ToUserPasskeyInfo(passkey.CredentialId, passkey.Data);
+                return passkey == null
+                    ? null
+                    : ToUserPasskeyInfo(passkey.CredentialId, passkey.Data);
+            }
+            finally
+            {
+                semaphore.Release();
+            }
         }
 
+        /// <summary>
+        /// Removes a passkey from a user.
+        /// </summary>
+        /// <param name="user">The user to remove the passkey from.</param>
+        /// <param name="credentialId">The credential ID of the passkey to remove.</param>
+        /// <param name="cancellationToken">The <see cref="CancellationToken"/> used to propagate notifications that the operation should be canceled.</param>
+        /// <returns>A <see cref="Task"/> that represents the asynchronous operation.</returns>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="user"/> or <paramref name="credentialId"/> is null.</exception>
         public async Task RemovePasskeyAsync(TUserEntity user, byte[] credentialId, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -785,21 +869,30 @@ namespace AspNetCore.Identity.CosmosDb.Stores
             if (user == null) throw new ArgumentNullException(nameof(user));
             if (credentialId == null) throw new ArgumentNullException(nameof(credentialId));
 
-            var passkeys = await GetUserPasskeysInternalAsync(user.Id, cancellationToken);
-
-            var passkey = passkeys
-                .SingleOrDefault(_ => _.CredentialId != null && _.CredentialId.SequenceEqual(credentialId));
-
-            if (passkey != null)
+            var semaphore = GetOrCreatePasskeySemaphore(user.Id);
+            await semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+            try
             {
-                _repo.Delete(passkey);
-                await _repo.SaveChangesAsync();
+                var passkeys = await GetUserPasskeysInternalAsync(user.Id, cancellationToken).ConfigureAwait(false);
+
+                var passkey = passkeys
+                    .SingleOrDefault(_ => _.CredentialId != null && _.CredentialId.SequenceEqual(credentialId));
+
+                if (passkey != null)
+                {
+                    _repo.Delete(passkey);
+                    await _repo.SaveChangesAsync().ConfigureAwait(false);
+                }
+            }
+            finally
+            {
+                semaphore.Release();
             }
         }
 
-        private static IdentityPasskeyData ToIdentityPasskeyData(UserPasskeyInfo passkey)
+        private static Microsoft.AspNetCore.Identity.IdentityPasskeyData ToIdentityPasskeyData(UserPasskeyInfo passkey)
         {
-            return new IdentityPasskeyData
+            return new Microsoft.AspNetCore.Identity.IdentityPasskeyData
             {
                 PublicKey = passkey.PublicKey,
                 Name = passkey.Name,
@@ -814,7 +907,7 @@ namespace AspNetCore.Identity.CosmosDb.Stores
             };
         }
 
-        private static UserPasskeyInfo ToUserPasskeyInfo(byte[] credentialId, IdentityPasskeyData data)
+        private static UserPasskeyInfo ToUserPasskeyInfo(byte[] credentialId, Microsoft.AspNetCore.Identity.IdentityPasskeyData data)
         {
             var passkey = new UserPasskeyInfo(
                 credentialId,

@@ -30,7 +30,7 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9.EntityConfigurations
             var converter = new PersonalDataConverter(new TestProtector());
             var config = new UserEntityTypeConfiguration<ProtectedNonStringUser, string>(converter);
 
-            Assert.ThrowsException<InvalidOperationException>(() =>
+            Assert.ThrowsExactly<InvalidOperationException>(() =>
                 config.Configure(builder.Entity<ProtectedNonStringUser>()));
         }
 

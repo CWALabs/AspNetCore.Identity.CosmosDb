@@ -107,7 +107,7 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9.Containers
         {
             await containerUtilities.CreateDatabaseAsync(testDatabaseName);
 
-            await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
+            await Assert.ThrowsExactlyAsync<ArgumentException>(async () =>
                 await containerUtilities.CreateContainerIfNotExistsAsync($"badpk-{Guid.NewGuid():N}", "UserId"));
         }
 
@@ -124,8 +124,8 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9.Containers
         {
             var connectionString = TestUtilities.GetKeyValue("ApplicationDbContextConnection");
 
-            Assert.ThrowsException<ArgumentNullException>(() => new ContainerUtilities(string.Empty, testDatabaseName));
-            Assert.ThrowsException<ArgumentNullException>(() => new ContainerUtilities(connectionString, string.Empty));
+            Assert.ThrowsExactly<ArgumentNullException>(() => new ContainerUtilities(string.Empty, testDatabaseName));
+            Assert.ThrowsExactly<ArgumentNullException>(() => new ContainerUtilities(connectionString, string.Empty));
         }
 
         [TestMethod()]
@@ -140,19 +140,19 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9.Containers
         [TestMethod()]
         public async Task A9_ArgumentGuards_ThrowExpectedExceptions()
         {
-            await Assert.ThrowsExceptionAsync<ArgumentNullException>(async () =>
+            await Assert.ThrowsExactlyAsync<ArgumentNullException>(async () =>
                 await containerUtilities.CreateDatabaseAsync(string.Empty));
 
-            await Assert.ThrowsExceptionAsync<ArgumentNullException>(async () =>
+            await Assert.ThrowsExactlyAsync<ArgumentNullException>(async () =>
                 await containerUtilities.DeleteDatabaseIfExists(string.Empty));
 
-            await Assert.ThrowsExceptionAsync<ArgumentNullException>(async () =>
+            await Assert.ThrowsExactlyAsync<ArgumentNullException>(async () =>
                 await containerUtilities.CreateContainerIfNotExistsAsync(string.Empty, "/Id"));
 
-            await Assert.ThrowsExceptionAsync<ArgumentNullException>(async () =>
+            await Assert.ThrowsExactlyAsync<ArgumentNullException>(async () =>
                 await containerUtilities.CreateContainerIfNotExistsAsync("abc", string.Empty));
 
-            await Assert.ThrowsExceptionAsync<ArgumentNullException>(async () =>
+            await Assert.ThrowsExactlyAsync<ArgumentNullException>(async () =>
                 await containerUtilities.DeleteContainerIfExists(string.Empty));
         }
     }

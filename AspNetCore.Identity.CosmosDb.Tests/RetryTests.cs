@@ -28,7 +28,7 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9
         {
             var attempts = 0;
 
-            Assert.ThrowsException<AggregateException>(() =>
+            Assert.ThrowsExactly<AggregateException>(() =>
                 Retry.Do(() =>
                 {
                     attempts++;
@@ -69,7 +69,7 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9
         {
             var attempts = 0;
 
-            await Assert.ThrowsExceptionAsync<AggregateException>(async () =>
+            await Assert.ThrowsExactlyAsync<AggregateException>(async () =>
                 await Retry.DoAsync(async () =>
                 {
                     attempts++;
@@ -86,7 +86,7 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9
             using var cts = new CancellationTokenSource();
             cts.Cancel();
 
-            await Assert.ThrowsExceptionAsync<OperationCanceledException>(async () =>
+            await Assert.ThrowsExactlyAsync<OperationCanceledException>(async () =>
                 await Retry.DoAsync(
                     async () => await Task.CompletedTask,
                     TimeSpan.FromMilliseconds(1),

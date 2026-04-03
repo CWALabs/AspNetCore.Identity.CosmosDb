@@ -103,6 +103,5 @@ namespace AspNetCore.Identity.CosmosDb
 
             ConfigureBackwardCompatibility(builder);
         }
-
     }
 }

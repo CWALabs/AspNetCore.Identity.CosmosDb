@@ -1,0 +1,51 @@
+@{
+    ViewData["Title"] = "Home";
+}
+
+<div class="jumbotron">
+    <h1 class="display-4">AspNetCore Identity with Cosmos DB & PassKeys</h1>
+    <p class="lead">Demo application showcasing PassKey authentication</p>
+    <hr class="my-4">
+    @if (User?.Identity?.IsAuthenticated ?? false)
+    {
+        <p>Welcome, @User.Identity.Name!</p>
+        <a class="btn btn-primary btn-lg" href="/Identity/Account/Manage" role="button">Manage Account</a>
+        <a class="btn btn-secondary btn-lg" asp-page="/Passkeys" role="button">Manage PassKeys</a>
+    }
+    else
+    {
+        <p>Sign in to access PassKey management</p>
+        <a class="btn btn-primary btn-lg" href="/Identity/Account/Login" role="button">Login</a>
+        <a class="btn btn-success btn-lg" href="/Identity/Account/Register" role="button">Register</a>
+    }
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <h2>About PassKeys</h2>
+        <p>PassKeys are a phishing-resistant authentication method that uses cryptographic credentials.</p>
+        <p><a class="btn btn-outline-primary" href="https://passkeys.dev/" target="_blank">Learn More</a></p>
+    </div>
+    <div class="col-md-4">
+        <h2>Features</h2>
+        <ul>
+            <li>Register multiple PassKeys</li>
+            <li>Authenticate using PassKeys</li>
+            <li>Manage PassKey backup status</li>
+            <li>Remove PassKeys</li>
+        </ul>
+    </div>
+    <div class="col-md-4">
+        <h2>API Documentation</h2>
+        <p>PassKey management APIs are available at:</p>
+        <ul>
+            <li>GET /identity/passkeys/list</li>
+            <li>POST /identity/passkeys/creation-options</li>
+            <li>POST /identity/passkeys/request-options</li>
+            <li>POST /identity/passkeys/register</li>
+            <li>POST /identity/passkeys/authenticate</li>
+            <li>POST /identity/passkeys/remove</li>
+            <li>POST /identity/passkeys/rename</li>
+        </ul>
+    </div>
+</div>

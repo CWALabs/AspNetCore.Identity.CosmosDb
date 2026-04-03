@@ -1,4 +1,6 @@
 ﻿using AspNetCore.Identity.CosmosDb.Stores;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -163,6 +165,62 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9
             lookupNormalizer.Setup(i => i.NormalizeName(It.IsAny<string>())).Returns(normalizerFunc);
             lookupNormalizer.Setup(i => i.NormalizeEmail(It.IsAny<string>())).Returns(normalizerFunc);
             return lookupNormalizer.Object;
+        }
+
+        public SignInManager<TUser> GetTestSignInManager<TUser>(
+            UserManager<TUser> userManager)
+            where TUser : class
+        {
+            var contextAccessor = new Mock<IHttpContextAccessor>();
+            var userPrincipalFactory = new Mock<IUserClaimsPrincipalFactory<TUser>>();
+            var options = new Mock<IOptions<IdentityOptions>>();
+            var logger = new Mock<ILogger<SignInManager<TUser>>>();
+            var schemes = new Mock<IAuthenticationSchemeProvider>();
+            var confirmation = new Mock<IUserConfirmation<TUser>>();
+
+            options.Setup(o => o.Value).Returns(new IdentityOptions());
+
+            var signInManager = new SignInManager<TUser>(
+                userManager,
+                contextAccessor.Object,
+                userPrincipalFactory.Object,
+                options.Object,
+                logger.Object,
+                schemes.Object,
+                confirmation.Object);
+
+            return signInManager;
+        }
+
+        /// <summary>
+        /// Helper method to create a UserPasskeyInfo for testing
+        /// </summary>
+        protected UserPasskeyInfo CreatePasskeyInfo(
+            string name,
+            uint signCount = 0,
+            bool isUserVerified = false,
+            bool isBackupEligible = false,
+            bool isBackedUp = false)
+        {
+            var credentialId = Guid.NewGuid().ToByteArray();
+            var publicKey = Guid.NewGuid().ToByteArray();
+            var attestationObject = Guid.NewGuid().ToByteArray();
+            var clientDataJson = Guid.NewGuid().ToByteArray();
+
+            return new UserPasskeyInfo(
+                credentialId,
+                publicKey,
+                DateTimeOffset.UtcNow,
+                signCount,
+                new[] { "internal" },
+                isUserVerified: isUserVerified,
+                isBackupEligible: isBackupEligible,
+                isBackedUp: isBackedUp,
+                attestationObject,
+                clientDataJson)
+            {
+                Name = name
+            };
         }
     }
 }

@@ -1,0 +1,54 @@
+@page "/Passkeys"
+@model AspNetCore.Identity.CosmosDb.Demo.Pages.PasskeysModel
+@{
+    ViewData["Title"] = "Passkeys";
+    Layout = "_Layout";
+}
+
+<div class="container mt-4">
+    <h2>Passkeys</h2>
+    <p class="text-muted">Manage passkeys for the signed-in account.</p>
+
+    <form method="post" class="d-none" id="passkeyAntiforgeryForm">
+        @Html.AntiForgeryToken()
+    </form>
+
+    <div class="mb-3">
+        <button id="addPasskeyBtn" class="btn btn-primary me-2">Add Passkey</button>
+        <button id="refreshPasskeysBtn" class="btn btn-outline-secondary">Refresh</button>
+    </div>
+
+    <div id="passkeyStatus" class="alert d-none" role="alert"></div>
+
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Created</th>
+                    <th>Sign Count</th>
+                    <th>Flags</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody id="passkeysTableBody">
+                <tr>
+                    <td colspan="5" class="text-muted">Loading passkeys...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="/identity/passkeys/client.js"></script>
+    <script>
+        window.AspNetCoreIdentityPasskeys?.initManagePage({
+            apiBase: "/identity/passkeys",
+            addButtonSelector: "#addPasskeyBtn",
+            refreshButtonSelector: "#refreshPasskeysBtn",
+            tableBodySelector: "#passkeysTableBody",
+            statusSelector: "#passkeyStatus"
+        });
+    </script>
+}

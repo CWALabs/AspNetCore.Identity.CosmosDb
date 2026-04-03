@@ -1,7 +1,13 @@
 name: NuGet Publish
 
 on:
-  workflow_dispatch
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
 
 jobs:
   test:
@@ -21,6 +27,9 @@ jobs:
     name: Publish to NuGet
     needs: test
     runs-on: ubuntu-latest
+    outputs:
+      is_stable_tag: ${{ steps.release-info.outputs.is_stable_tag }}
+      release_tag: ${{ steps.release-info.outputs.release_tag }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -31,10 +40,57 @@ jobs:
           dotnet-version: 10.0.x
       - name: Restore
         run: dotnet restore
-      - name: Pack
+      - name: Determine release metadata
+        id: release-info
+        run: |
+          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            echo "release_tag=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+            if [[ "${GITHUB_REF_NAME}" == *-* ]]; then
+              echo "is_stable_tag=false" >> "$GITHUB_OUTPUT"
+            else
+              echo "is_stable_tag=true" >> "$GITHUB_OUTPUT"
+            fi
+          else
+            echo "release_tag=" >> "$GITHUB_OUTPUT"
+            echo "is_stable_tag=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Pack main library
         run: dotnet pack AspNetCore.Identity.CosmosDb/AspNetCore.Identity.CosmosDb.csproj -c Release --no-restore -o ./nupkg
-      - name: Publish NuGet package
+      - name: Pack templates
+        run: dotnet pack AspNetCore.Identity.Razor.PassKeyPage/AspNetCore.Identity.Razor.PassKeyPage.csproj -c Release --no-restore -o ./nupkg
+      - name: Pack demo project template
+        run: dotnet pack AspNetCore.Identity.CosmosDb.Demo.Template/AspNetCore.Identity.CosmosDb.Demo.Template.csproj -c Release --no-restore -o ./nupkg
+      - name: Publish NuGet packages
         run: dotnet nuget push "${{ github.workspace }}/nupkg/*.nupkg" --api-key ${{ secrets.NUGET_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
       - name: Publish NuGet symbols
         run: dotnet nuget push "${{ github.workspace }}/nupkg/*.snupkg" --api-key ${{ secrets.NUGET_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+      - name: Upload package artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: nuget-packages
+          path: |
+            nupkg/*.nupkg
+            nupkg/*.snupkg
+
+  create-release:
+    name: Create GitHub Release
+    needs: publish
+    runs-on: ubuntu-latest
+    if: needs.publish.outputs.is_stable_tag == 'true'
+    steps:
+      - name: Download package artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: nuget-packages
+          path: nupkg
+
+      - name: Create GitHub release with packages
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.publish.outputs.release_tag }}
+          generate_release_notes: true
+          prerelease: false
+          files: |
+            nupkg/*.nupkg
+            nupkg/*.snupkg
 

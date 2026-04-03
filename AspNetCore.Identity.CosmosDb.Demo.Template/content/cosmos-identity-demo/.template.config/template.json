@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json.schemastore.org/template",
+  "author": "AspNetCore.Identity.CosmosDb Contributors",
+  "classifications": ["Web", "ASP.NET", "Identity", "Cosmos DB", "Passkeys", "Demo"],
+  "identity": "AspNetCore.Identity.CosmosDb.Demo.ProjectTemplate.CSharp.1.0",
+  "name": "Cosmos Identity Demo App",
+  "shortName": "cosmos-identity-demo",
+  "description": "Creates a full ASP.NET Core demo app pre-wired for AspNetCore.Identity.CosmosDb with passkey endpoints and UI.",
+  "sourceName": "AspNetCore.Identity.CosmosDb.Demo",
+  "preferNameDirectory": true,
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "symbols": {
+    "skipRestore": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "false",
+      "description": "If true, skips automatic restore after creating the project."
+    }
+  },
+  "postActions": [
+    {
+      "condition": "(!skipRestore)",
+      "description": "Restore NuGet packages required by this project.",
+      "manualInstructions": [
+        {
+          "text": "Run 'dotnet restore'"
+        }
+      ],
+      "actionId": "210D431B-A78B-4D2F-B762-4ED3E3EA9025",
+      "continueOnError": true
+    }
+  ],
+  "primaryOutputs": [
+    {
+      "path": "AspNetCore.Identity.CosmosDb.Demo.csproj"
+    }
+  ]
+}
