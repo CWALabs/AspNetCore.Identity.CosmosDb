@@ -71,10 +71,32 @@ jobs:
             TestResults/*-coverage.cobertura.xml
             TestResults/CoverageReport/**
 
-      - name: Upload to Codecov
+      - name: Prepare coverage pages artifact
         if: always()
-        uses: codecov/codecov-action@v4
+        run: |
+          touch TestResults/CoverageReport/.nojekyll
+          if [ -f "TestResults/CoverageReport/badge_linecoverage.svg" ]; then
+            cp TestResults/CoverageReport/badge_linecoverage.svg TestResults/CoverageReport/badge.svg
+          fi
+
+      - name: Upload coverage pages artifact
+        if: always()
+        uses: actions/upload-pages-artifact@v3
         with:
-          files: ./TestResults/CoverageReport/Cobertura.xml
-          fail_ci_if_error: false
-          verbose: true
+          path: TestResults/CoverageReport
+
+  publish-coverage-pages:
+    name: Publish Coverage Pages
+    if: always()
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy coverage pages
+        id: deployment
+        uses: actions/deploy-pages@v4

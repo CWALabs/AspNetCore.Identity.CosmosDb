@@ -3,7 +3,7 @@
 This folder contains the source code for the `AspNetCore.Identity.CosmosDb` NuGet package (.NET 10). It implements the full [ASP.NET Core Identity](https://learn.microsoft.com/aspnet/core/security/authentication/identity) store interface backed by [Azure Cosmos DB](https://learn.microsoft.com/azure/cosmos-db/) via [EF Core Cosmos](https://learn.microsoft.com/ef/core/providers/cosmos/).
 
 [![Build and Test](https://github.com/CWALabs/AspNetCore.Identity.CosmosDb/actions/workflows/ci.yml/badge.svg)](https://github.com/CWALabs/AspNetCore.Identity.CosmosDb/actions/workflows/ci.yml)
-[![Coverage](https://codecov.io/gh/CWALabs/AspNetCore.Identity.CosmosDb/branch/main/graph/badge.svg)](https://codecov.io/gh/CWALabs/AspNetCore.Identity.CosmosDb)
+[![Coverage](https://cwalabs.github.io/AspNetCore.Identity.CosmosDb/badge.svg)](https://cwalabs.github.io/AspNetCore.Identity.CosmosDb)
 
 - **NuGet package**: [`AspNetCore.Identity.CosmosDb`](https://www.nuget.org/packages/AspNetCore.Identity.CosmosDb)
 - **Package README** (NuGet.org-facing): [PACKAGE_README.md](PACKAGE_README.md)
