@@ -13,7 +13,7 @@ permissions:
 jobs:
   build-and-test:
     name: Build and Test
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
       - uses: actions/checkout@v4
@@ -29,16 +29,38 @@ jobs:
       - name: Build
         run: dotnet build --no-restore -c Release
 
+      - name: Start Cosmos DB Emulator
+        shell: pwsh
+        run: |
+          Import-Module "$env:ProgramFiles\Azure Cosmos DB Emulator\PSModules\Microsoft.Azure.CosmosDB.Emulator"
+          Start-CosmosDbEmulator
+
+          $ready = $false
+          for ($i = 0; $i -lt 30; $i++) {
+            try {
+              Invoke-WebRequest -Uri "https://localhost:8081/_explorer/index.html" -SkipCertificateCheck | Out-Null
+              $ready = $true
+              break
+            }
+            catch {
+              Start-Sleep -Seconds 5
+            }
+          }
+
+          if (-not $ready) {
+            throw "Cosmos DB Emulator did not become ready in time."
+          }
+
       - name: Run main tests
         env:
-          APPLICATIONDBCONTEXTCONNECTION: ${{ secrets.APPLICATIONDBCONTEXTCONNECTION }}
-          COSMOSIDENTITYDBNAME: ${{ secrets.COSMOSIDENTITYDBNAME }}
+          APPLICATIONDBCONTEXTCONNECTION: AccountEndpoint=https://localhost:8081/;AccountKey=C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==;
+          COSMOSIDENTITYDBNAME: CosmosIdentityMainTests
         run: |
           dotnet test --project AspNetCore.Identity.CosmosDb.Tests/AspNetCore.Identity.CosmosDb.Tests.csproj --no-build -c Release --verbosity normal
 
       - name: Run compatibility tests
         env:
-          APPLICATIONDBCONTEXTCONNECTION: ${{ secrets.APPLICATIONDBCONTEXTCONNECTION }}
-          COSMOSIDENTITYDBNAME: ${{ secrets.COSMOSIDENTITYDBNAME }}
+          APPLICATIONDBCONTEXTCONNECTION: AccountEndpoint=https://localhost:8081/;AccountKey=C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==;
+          COSMOSIDENTITYDBNAME: CosmosIdentityCompatTests
         run: |
           dotnet test --project AspNetCore.Identity.CosmosDbCompat.Tests/AspNetCore.Identity.CosmosDbCompat.Tests.csproj --no-build -c Release --verbosity normal

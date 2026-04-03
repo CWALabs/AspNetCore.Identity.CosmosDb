@@ -24,8 +24,12 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9.Containers
             // Setup context.
             //
             utils = new TestUtilities();
-            testDatabaseName = $"{TestUtilities.GetKeyValue("CosmosIdentityDbName")}-cu-{Guid.NewGuid():N}";
+            testDatabaseName = $"{TestUtilities.GetKeyValue("CosmosIdentityDbName")}-cu";
             containerUtilities = utils.GetContainerUtilities(TestUtilities.GetKeyValue("ApplicationDbContextConnection"), testDatabaseName);
+
+            // Reuse a stable test DB name and clean it first to avoid accumulating
+            // orphaned containers when previous CI runs are interrupted.
+            containerUtilities.DeleteDatabaseIfExists(testDatabaseName).GetAwaiter().GetResult();
         }
 
         /// <summary>
