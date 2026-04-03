@@ -1,8 +1,6 @@
 # AspNetCore.Identity.CosmosDb
 
-[![CodeQL](https://github.com/CWALabs/AspNetCore.Identity.CosmosDb/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/CWALabs/AspNetCore.Identity.CosmosDb/actions/workflows/codeql-analysis.yml)
 [![Build and Test](https://github.com/CWALabs/AspNetCore.Identity.CosmosDb/actions/workflows/ci.yml/badge.svg)](https://github.com/CWALabs/AspNetCore.Identity.CosmosDb/actions/workflows/ci.yml)
-[![Coverage](https://cwalabs.github.io/AspNetCore.Identity.CosmosDb/badge.svg)](https://cwalabs.github.io/AspNetCore.Identity.CosmosDb)
 [![NuGet](https://img.shields.io/nuget/v/AspNetCore.Identity.CosmosDb.svg)](https://www.nuget.org/packages/AspNetCore.Identity.CosmosDb)
 
 `AspNetCore.Identity.CosmosDb` is a .NET 10 ASP.NET Core Identity provider backed by Azure Cosmos DB and EF Core Cosmos. It stores users, roles, claims, tokens, external logins, and passkeys in Cosmos DB while preserving the standard ASP.NET Core Identity programming model.

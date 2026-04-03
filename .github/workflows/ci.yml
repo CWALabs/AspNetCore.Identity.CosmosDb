@@ -9,7 +9,6 @@ on:
 
 permissions:
   contents: read
-  id-token: write
 
 jobs:
   build-and-test:
@@ -30,73 +29,16 @@ jobs:
       - name: Build
         run: dotnet build --no-restore -c Release
 
-      - name: Install coverage tools
-        run: |
-          dotnet tool install --global dotnet-coverage
-          dotnet tool install --global dotnet-reportgenerator-globaltool
-          echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
-
       - name: Run main tests
         env:
           APPLICATIONDBCONTEXTCONNECTION: ${{ secrets.APPLICATIONDBCONTEXTCONNECTION }}
           COSMOSIDENTITYDBNAME: ${{ secrets.COSMOSIDENTITYDBNAME }}
         run: |
-          mkdir -p TestResults
-          dotnet-coverage collect "dotnet test --project AspNetCore.Identity.CosmosDb.Tests/AspNetCore.Identity.CosmosDb.Tests.csproj --no-build -c Release --verbosity normal" -f cobertura -o ./TestResults/main-coverage.cobertura.xml
+          dotnet test --project AspNetCore.Identity.CosmosDb.Tests/AspNetCore.Identity.CosmosDb.Tests.csproj --no-build -c Release --verbosity normal
 
       - name: Run compatibility tests
         env:
           APPLICATIONDBCONTEXTCONNECTION: ${{ secrets.APPLICATIONDBCONTEXTCONNECTION }}
           COSMOSIDENTITYDBNAME: ${{ secrets.COSMOSIDENTITYDBNAME }}
         run: |
-          dotnet-coverage collect "dotnet test --project AspNetCore.Identity.CosmosDbCompat.Tests/AspNetCore.Identity.CosmosDbCompat.Tests.csproj --no-build -c Release --verbosity normal" -f cobertura -o ./TestResults/compat-coverage.cobertura.xml
-
-      - name: Generate merged coverage report and badge assets
-        run: |
-          reportgenerator "-reports:TestResults/*-coverage.cobertura.xml" "-targetdir:TestResults/CoverageReport" "-reporttypes:Cobertura;MarkdownSummaryGithub;Badges" "-assemblyfilters:+AspNetCore.Identity.CosmosDb"
-
-      - name: Publish coverage summary
-        if: always()
-        run: |
-          if [ -f "TestResults/CoverageReport/SummaryGithub.md" ]; then
-            cat TestResults/CoverageReport/SummaryGithub.md >> $GITHUB_STEP_SUMMARY
-          fi
-
-      - name: Upload coverage artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-report
-          path: |
-            TestResults/*-coverage.cobertura.xml
-            TestResults/CoverageReport/**
-
-      - name: Prepare coverage pages artifact
-        if: always()
-        run: |
-          touch TestResults/CoverageReport/.nojekyll
-          if [ -f "TestResults/CoverageReport/badge_linecoverage.svg" ]; then
-            cp TestResults/CoverageReport/badge_linecoverage.svg TestResults/CoverageReport/badge.svg
-          fi
-
-      - name: Upload coverage pages artifact
-        if: always()
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: TestResults/CoverageReport
-
-  publish-coverage-pages:
-    name: Publish Coverage Pages
-    if: always()
-    needs: build-and-test
-    runs-on: ubuntu-latest
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy coverage pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          dotnet test --project AspNetCore.Identity.CosmosDbCompat.Tests/AspNetCore.Identity.CosmosDbCompat.Tests.csproj --no-build -c Release --verbosity normal
