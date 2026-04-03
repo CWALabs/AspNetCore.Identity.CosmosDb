@@ -42,14 +42,14 @@ jobs:
           COSMOSIDENTITYDBNAME: ${{ secrets.COSMOSIDENTITYDBNAME }}
         run: |
           mkdir -p TestResults
-          dotnet-coverage collect "dotnet test AspNetCore.Identity.CosmosDb.Tests/AspNetCore.Identity.CosmosDb.Tests.csproj --no-build -c Release --verbosity normal" -f cobertura -o ./TestResults/main-coverage.cobertura.xml
+          dotnet-coverage collect "dotnet test --project AspNetCore.Identity.CosmosDb.Tests/AspNetCore.Identity.CosmosDb.Tests.csproj --no-build -c Release --verbosity normal" -f cobertura -o ./TestResults/main-coverage.cobertura.xml
 
       - name: Run compatibility tests
         env:
           APPLICATIONDBCONTEXTCONNECTION: ${{ secrets.APPLICATIONDBCONTEXTCONNECTION }}
           COSMOSIDENTITYDBNAME: ${{ secrets.COSMOSIDENTITYDBNAME }}
         run: |
-          dotnet-coverage collect "dotnet test AspNetCore.Identity.CosmosDbCompat.Tests/AspNetCore.Identity.CosmosDbCompat.Tests.csproj --no-build -c Release --verbosity normal" -f cobertura -o ./TestResults/compat-coverage.cobertura.xml
+          dotnet-coverage collect "dotnet test --project AspNetCore.Identity.CosmosDbCompat.Tests/AspNetCore.Identity.CosmosDbCompat.Tests.csproj --no-build -c Release --verbosity normal" -f cobertura -o ./TestResults/compat-coverage.cobertura.xml
 
       - name: Generate merged coverage report and badge assets
         run: |
