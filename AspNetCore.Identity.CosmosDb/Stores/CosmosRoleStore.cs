@@ -105,7 +105,7 @@ namespace AspNetCore.Identity.CosmosDb.Stores
         }
 
         // <inheritdoc />
-        public async Task<TRoleEntity> FindByIdAsync(string roleId, CancellationToken cancellationToken = default)
+        public async Task<TRoleEntity?> FindByIdAsync(string roleId, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -113,7 +113,7 @@ namespace AspNetCore.Identity.CosmosDb.Stores
             if (string.IsNullOrWhiteSpace(roleId))
                 throw new ArgumentNullException(nameof(roleId));
 
-            var typedId = (TKey)TypeDescriptor.GetConverter(typeof(TKey)).ConvertFromInvariantString(roleId);
+            var typedId = (TKey)TypeDescriptor.GetConverter(typeof(TKey)).ConvertFromInvariantString(roleId)!;
             var role = await _repo.Table<TRoleEntity>()
                 .SingleOrDefaultAsync(_ => _.Id.Equals(typedId), cancellationToken: cancellationToken);
 
@@ -121,7 +121,7 @@ namespace AspNetCore.Identity.CosmosDb.Stores
         }
 
         // <inheritdoc />
-        public async Task<TRoleEntity> FindByNameAsync(string normalizedName,
+        public async Task<TRoleEntity?> FindByNameAsync(string normalizedName,
             CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -151,7 +151,7 @@ namespace AspNetCore.Identity.CosmosDb.Stores
         }
 
         // <inheritdoc />
-        public Task<string?> GetRoleIdAsync(TRoleEntity role, CancellationToken cancellationToken = default)
+        public Task<string> GetRoleIdAsync(TRoleEntity role, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -161,7 +161,7 @@ namespace AspNetCore.Identity.CosmosDb.Stores
                 throw new ArgumentNullException(nameof(role));
             }
 
-            return Task.FromResult(role.Id.ToString());
+            return Task.FromResult(role.Id.ToString()!);
         }
 
         // <inheritdoc />
@@ -321,7 +321,7 @@ namespace AspNetCore.Identity.CosmosDb.Stores
             }
         }
 
-        private async Task<IdentityRoleClaim<TKey>> FindRoleClaimAsync(TKey roleId, string claimType, string claimValue,
+        private async Task<IdentityRoleClaim<TKey>?> FindRoleClaimAsync(TKey roleId, string claimType, string claimValue,
             CancellationToken cancellationToken)
         {
             return await _repo.Table<IdentityRoleClaim<TKey>>()

@@ -53,7 +53,7 @@ jobs:
 
       - name: Generate merged coverage report and badge assets
         run: |
-          reportgenerator "-reports:TestResults/*-coverage.cobertura.xml" "-targetdir:TestResults/CoverageReport" "-reporttypes:Cobertura;MarkdownSummaryGithub;Badges"
+          reportgenerator "-reports:TestResults/*-coverage.cobertura.xml" "-targetdir:TestResults/CoverageReport" "-reporttypes:Cobertura;MarkdownSummaryGithub;Badges" "-assemblyfilters:+AspNetCore.Identity.CosmosDb"
 
       - name: Publish coverage summary
         if: always()

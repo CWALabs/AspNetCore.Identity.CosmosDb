@@ -144,7 +144,7 @@ namespace AspNetCore.Identity.CosmosDb.Containers
             var database = _client.GetDatabase(_databaseName);
             var container = database.GetContainer(containerName);
 
-            ContainerResponse response = null;
+            ContainerResponse? response = null;
             try
             {
                 response = await container.DeleteContainerAsync();
@@ -201,8 +201,8 @@ namespace AspNetCore.Identity.CosmosDb.Containers
     /// </summary>
     public class ContainerDefinition
     {
-        public string ContainerName { get; set; }
+        public required string ContainerName { get; set; }
 
-        public string PartitionKey { get; set; }
+        public required string PartitionKey { get; set; }
     }
 }

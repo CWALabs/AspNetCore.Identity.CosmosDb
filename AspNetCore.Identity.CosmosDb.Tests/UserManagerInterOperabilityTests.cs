@@ -1022,7 +1022,7 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9
             var result = await userManager.IsLockedOutAsync(user);
 
             // Assert
-            Assert.IsFalse(false);
+            Assert.IsFalse(result);
         }
 
         [TestMethod]

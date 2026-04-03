@@ -20,7 +20,7 @@ namespace AspNetCore.Identity.CosmosDb
             TimeSpan retryInterval,
             int maxAttemptCount = 5)
         {
-            Do<object>(() =>
+            Do<object?>(() =>
             {
                 action();
                 return null;
@@ -71,7 +71,7 @@ namespace AspNetCore.Identity.CosmosDb
             int maxAttemptCount = 5,
             CancellationToken cancellationToken = default)
         {
-            await DoAsync<object>(
+            await DoAsync<object?>(
                 async () =>
                 {
                     await action();

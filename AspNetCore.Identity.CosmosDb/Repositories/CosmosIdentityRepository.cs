@@ -66,13 +66,13 @@ namespace AspNetCore.Identity.CosmosDb.Repositories
         }
 
         [Obsolete("Synchronous Cosmos operations are not recommended. Use GetByIdAsync instead.")]
-        public TEntity GetById<TEntity>(string id)
+        public TEntity? GetById<TEntity>(string id)
             where TEntity : class, new()
         {
             return GetByIdAsync<TEntity>(id).GetAwaiter().GetResult();
         }
 
-        public async Task<TEntity> GetByIdAsync<TEntity>(string id, CancellationToken cancellationToken = default)
+        public async Task<TEntity?> GetByIdAsync<TEntity>(string id, CancellationToken cancellationToken = default)
             where TEntity : class, new()
         {
             return await _db.Set<TEntity>()
@@ -81,13 +81,13 @@ namespace AspNetCore.Identity.CosmosDb.Repositories
         }
 
         [Obsolete("Synchronous Cosmos operations are not recommended. Use TryFindOneAsync instead.")]
-        public TEntity TryFindOne<TEntity>(Expression<Func<TEntity, bool>> predicate)
+        public TEntity? TryFindOne<TEntity>(Expression<Func<TEntity, bool>> predicate)
             where TEntity : class, new()
         {
             return TryFindOneAsync<TEntity>(predicate).GetAwaiter().GetResult();
         }
 
-        public async Task<TEntity> TryFindOneAsync<TEntity>(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
+        public async Task<TEntity?> TryFindOneAsync<TEntity>(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
             where TEntity : class, new()
         {
             return await _db.Set<TEntity>().SingleOrDefaultAsync(predicate, cancellationToken);

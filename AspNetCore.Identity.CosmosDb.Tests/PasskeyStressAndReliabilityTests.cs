@@ -482,7 +482,6 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9
             Assert.AreEqual(originalPasskey.Name, retrieved.Name, "Name should match");
             Assert.AreEqual(originalPasskey.IsUserVerified, retrieved.IsUserVerified, "User verified flag should match");
             Assert.IsNotNull(retrieved.PublicKey, "Public key should be preserved");
-            Assert.IsNotNull(retrieved.CreatedAt, "Created at should be preserved");
         }
 
         #endregion

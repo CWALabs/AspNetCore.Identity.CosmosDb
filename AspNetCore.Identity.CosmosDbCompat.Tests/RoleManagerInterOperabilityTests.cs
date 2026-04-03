@@ -8,8 +8,8 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net7
     [TestClass()]
     public class RoleManagerInterOperabilityTests : CosmosIdentityTestsBase
     {
-        private static string connectionString;
-        private static string databaseName;
+        private static string connectionString = null!;
+        private static string databaseName = null!;
 
         // Creates a new test role using the mock RoleManager to do so
         private async Task<IdentityRole> GetTestRole(RoleManager<IdentityRole> roleManager)
@@ -20,7 +20,7 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net7
 
             Assert.IsTrue(result.Succeeded);
 
-            return await roleManager.FindByIdAsync(role.Id);
+            return (await roleManager.FindByIdAsync(role.Id))!;
         }
 
         [ClassInitialize]
@@ -133,7 +133,7 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net7
             var name = role.Name;
 
             // Act
-            var result = await roleManager.FindByNameAsync(name);
+            var result = await roleManager.FindByNameAsync(name!);
 
             // Assert
             Assert.IsNotNull(result);
@@ -216,7 +216,7 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net7
             var role = await GetTestRole(roleManager);
 
             // Act
-            var result = await roleManager.RoleExistsAsync(role.Name);
+            var result = await roleManager.RoleExistsAsync(role.Name!);
 
             // Assert
             Assert.IsTrue(result);
@@ -237,7 +237,7 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net7
             // Assert
             Assert.IsTrue(result.Succeeded);
             var result2 = await roleManager.FindByIdAsync(role.Id);
-            Assert.AreEqual(name, result2.Name);
+            Assert.AreEqual(name, result2!.Name);
 
         }
 
@@ -265,14 +265,14 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net7
             var result = await roleManager.SetRoleNameAsync(role, name);
             Assert.IsTrue(result.Succeeded);
             var result2 = await roleManager.FindByIdAsync(role.Id);
-            Assert.AreEqual(name, result2.Name);
+            Assert.AreEqual(name, result2!.Name);
 
             // Act
             await roleManager.UpdateNormalizedRoleNameAsync(role);
 
             // Assert
             var result3 = await roleManager.FindByIdAsync(role.Id);
-            Assert.AreEqual(name.ToUpperInvariant(), result3.NormalizedName);
+            Assert.AreEqual(name.ToUpperInvariant(), result3!.NormalizedName);
         }
 
         [TestMethod]
@@ -293,7 +293,7 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net7
             // Assert
             Assert.IsTrue(result1.Succeeded);
             var result2 = await roleManager.FindByIdAsync(role.Id);
-            Assert.AreEqual(n, result2.Name);
+            Assert.AreEqual(n, result2!.Name);
             Assert.AreEqual(nn, result2.NormalizedName);
 
         }

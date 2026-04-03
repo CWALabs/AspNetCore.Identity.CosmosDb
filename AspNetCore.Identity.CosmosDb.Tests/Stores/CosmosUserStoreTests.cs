@@ -64,10 +64,10 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9.Stores
             var user2 = await userStore.FindByIdAsync(TestUtilities.IDENUSER1ID);
 
             Assert.IsNotNull(user2);
-            Assert.AreEqual(user2.UserName, TestUtilities.IDENUSER1EMAIL);
-            Assert.AreEqual(user2.Email, TestUtilities.IDENUSER1EMAIL);
-            Assert.AreEqual(user2.NormalizedUserName, TestUtilities.IDENUSER1EMAIL.ToUpper());
-            Assert.AreEqual(user2.NormalizedEmail, TestUtilities.IDENUSER1EMAIL.ToUpper());
+            Assert.AreEqual(TestUtilities.IDENUSER1EMAIL, user2.UserName);
+            Assert.AreEqual(TestUtilities.IDENUSER1EMAIL, user2.Email);
+            Assert.AreEqual(TestUtilities.IDENUSER1EMAIL.ToUpper(), user2.NormalizedUserName);
+            Assert.AreEqual(TestUtilities.IDENUSER1EMAIL.ToUpper(), user2.NormalizedEmail);
         }
 
         [TestMethod()]
@@ -179,7 +179,6 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9.Stores
             using var userStore = _testUtilities.GetUserStore(connectionString, databaseName);
             var user = await GetMockRandomUserAsync(userStore);
             var result = await userStore.GetEmailConfirmedAsync(user);
-            Assert.IsNotNull(result);
             Assert.IsFalse(result);
 
             // Arrange - user name and email are the same with this test
@@ -189,7 +188,6 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9.Stores
             result = await userStore.GetEmailConfirmedAsync(user);
 
             // Assert
-            Assert.IsNotNull(result);
             Assert.IsTrue(result);
         }
 
@@ -200,7 +198,6 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9.Stores
             using var userStore = _testUtilities.GetUserStore(connectionString, databaseName);
             var user = await GetMockRandomUserAsync(userStore);
             var result = await userStore.GetEmailConfirmedAsync(user);
-            Assert.IsNotNull(result);
             Assert.IsFalse(result);
             await userStore.SetEmailConfirmedAsync(user, true);
 
@@ -208,7 +205,6 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9.Stores
             result = await userStore.GetEmailConfirmedAsync(user);
 
             // Assert
-            Assert.IsNotNull(result);
             Assert.IsTrue(result);
         }
 

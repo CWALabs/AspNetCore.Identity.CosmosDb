@@ -25,14 +25,14 @@ namespace AspNetCore.Identity.CosmosDb.Contracts
         DbSet<TEntity> Table<TEntity>() where TEntity : class, new();
 
         [Obsolete("Synchronous Cosmos operations are not recommended. Use GetByIdAsync instead.")]
-        TEntity GetById<TEntity>(string id) where TEntity : class, new();
+        TEntity? GetById<TEntity>(string id) where TEntity : class, new();
 
-        Task<TEntity> GetByIdAsync<TEntity>(string id, CancellationToken cancellationToken = default) where TEntity : class, new();
+        Task<TEntity?> GetByIdAsync<TEntity>(string id, CancellationToken cancellationToken = default) where TEntity : class, new();
 
         [Obsolete("Synchronous Cosmos operations are not recommended. Use TryFindOneAsync instead.")]
-        TEntity TryFindOne<TEntity>(Expression<Func<TEntity, bool>> predicate) where TEntity : class, new();
+        TEntity? TryFindOne<TEntity>(Expression<Func<TEntity, bool>> predicate) where TEntity : class, new();
 
-        Task<TEntity> TryFindOneAsync<TEntity>(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default) where TEntity : class, new();
+        Task<TEntity?> TryFindOneAsync<TEntity>(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default) where TEntity : class, new();
 
         IQueryable<TEntity> Find<TEntity>(Expression<Func<TEntity, bool>> predicate) where TEntity : class, new();
 

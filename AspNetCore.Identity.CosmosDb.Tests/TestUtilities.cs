@@ -27,9 +27,6 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9
 
         public const string IDENUSER2ID = "55250c6f-7c91-465a-a9ce-ea9bbe6caf81";
 
-        //public const string DATABASENAME = "cosmosdb";
-        private readonly string _databaseName;
-
         /// <summary>
         /// Gets the configuration
         /// </summary>

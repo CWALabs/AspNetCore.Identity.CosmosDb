@@ -9,8 +9,8 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9
     [TestClass]
     public class UserManagerInterOperabilityTests : CosmosIdentityTestsBase
     {
-        private static string connectionString;
-        private static string databaseName;
+        private static string connectionString = null!;
+        private static string databaseName = null!;
         // Creates a new test user with a hashed password, using the mock UserManager to do so
         private async Task<IdentityUser> GetTestUser(UserManager<IdentityUser> userManager, string password = "")
         {
@@ -22,7 +22,7 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9
             var result = await userManager.CreateAsync(user, password);
 
             Assert.IsTrue(result.Succeeded);
-            return await userManager.FindByIdAsync(user.Id);
+            return (await userManager.FindByIdAsync(user.Id))!;
         }
 
         [ClassInitialize]
@@ -67,7 +67,7 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9
 
             // Assert
             var result2 = await userManager.FindByIdAsync(user.Id);
-            Assert.IsTrue(user.Id == result2.Id);
+            Assert.IsTrue(user.Id == result2!.Id);
         }
 
         [TestMethod]
@@ -83,7 +83,7 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9
 
             // Assert
             user = await userManager.FindByIdAsync(user.Id);
-            Assert.AreEqual("9998884444", user.PhoneNumber);
+            Assert.AreEqual("9998884444", user!.PhoneNumber);
 
         }
 
@@ -128,7 +128,7 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9
             var user = await GetTestUser(userManager);
 
             // Act
-            user = await userManager.FindByNameAsync(user.UserName);
+            user = await userManager.FindByNameAsync(user.UserName!);
 
             // Assert
             Assert.IsNotNull(user);
@@ -164,7 +164,7 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9
 
             // Assert
             user = await userManager.FindByIdAsync(user.Id);
-            Assert.IsTrue(user.NormalizedUserName == userName.ToUpperInvariant());
+            Assert.IsTrue(user!.NormalizedUserName == userName.ToUpperInvariant());
         }
 
         [TestMethod]
@@ -194,7 +194,7 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9
 
             // Assert
             user = await userManager.FindByIdAsync(user.Id);
-            Assert.IsTrue(user.UserName == userName);
+            Assert.IsTrue(user!.UserName == userName);
         }
 
         [TestMethod]
@@ -265,7 +265,7 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9
             user = await userManager.FindByIdAsync(user.Id);
 
             // Act
-            var result3 = await userManager.AddPasswordAsync(user, $"A1a{Guid.NewGuid()}");
+            var result3 = await userManager.AddPasswordAsync(user!, $"A1a{Guid.NewGuid()}");
 
             // Assert
             Assert.IsTrue(result3.Succeeded); // Already has a password
@@ -330,7 +330,7 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9
             // Assert
             user = await userManager.FindByIdAsync(user.Id);
             Assert.IsTrue(result.Succeeded);
-            Assert.AreNotEqual(stamp1, user.SecurityStamp);
+            Assert.AreNotEqual(stamp1, user!.SecurityStamp);
         }
 
         // TODO: Register two factor token provider in order for this to work
@@ -381,7 +381,7 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9
             var user2 = await userManager.FindByLoginAsync("Twitter", loginInfo.ProviderKey);
 
             // Assert
-            Assert.AreEqual(user.Id, user2.Id);
+            Assert.AreEqual(user.Id, user2!.Id);
 
         }
 
@@ -397,7 +397,7 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9
             Assert.AreEqual(1, logins.Count);
             Assert.IsTrue(logins.Any(a => a.LoginProvider.Equals("Twitter")));
             var user2 = await userManager.FindByLoginAsync("Twitter", loginInfo.ProviderKey);
-            Assert.AreEqual(user.Id, user2.Id);
+            Assert.AreEqual(user.Id, user2!.Id);
 
             // Act
             var result = await userManager.RemoveLoginAsync(user, "Twitter", loginInfo.ProviderKey);
@@ -563,7 +563,7 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9
             Assert.IsTrue(result1.Succeeded);
 
             // Act
-            var result2 = await userManager.AddToRoleAsync(user, role.Name);
+            var result2 = await userManager.AddToRoleAsync(user, role.Name!);
 
             // Assert
             Assert.IsTrue(result2.Succeeded);
@@ -587,7 +587,7 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9
             Assert.IsTrue(result2.Succeeded);
             var result3 = await roleManager.CreateAsync(role3);
             Assert.IsTrue(result3.Succeeded);
-            var roles = new string[] { role1.Name, role2.Name, role3.Name };
+            var roles = new string[] { role1.Name!, role2.Name!, role3.Name! };
 
             // Act
             var result4 = await userManager.AddToRolesAsync(user, roles);
@@ -608,10 +608,10 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9
             var role = await GetMockRandomRoleAsync(null, false);
             var result1 = await roleManager.CreateAsync(role);
             Assert.IsTrue(result1.Succeeded);
-            Assert.IsTrue((await userManager.AddToRoleAsync(user, role.Name)).Succeeded);
+            Assert.IsTrue((await userManager.AddToRoleAsync(user, role.Name!)).Succeeded);
 
             // Act
-            var result2 = await userManager.RemoveFromRoleAsync(user, role.Name);
+            var result2 = await userManager.RemoveFromRoleAsync(user, role.Name!);
 
             // Assert
             Assert.IsTrue(result2.Succeeded);
@@ -636,7 +636,7 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9
             Assert.IsTrue(result2.Succeeded);
             var result3 = await roleManager.CreateAsync(role3);
             Assert.IsTrue(result3.Succeeded);
-            var roles = new string[] { role1.Name, role2.Name, role3.Name };
+            var roles = new string[] { role1.Name!, role2.Name!, role3.Name! };
 
             // Act
             var result5 = await userManager.RemoveFromRolesAsync(user, roles);
@@ -664,7 +664,7 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9
             Assert.IsTrue(result2.Succeeded);
             var result3 = await roleManager.CreateAsync(role3);
             Assert.IsTrue(result3.Succeeded);
-            var roles = new string[] { role1.Name, role2.Name, role3.Name };
+            var roles = new string[] { role1.Name!, role2.Name!, role3.Name! };
             Assert.IsTrue((await userManager.AddToRolesAsync(user, roles)).Succeeded);
 
             // Act
@@ -684,10 +684,10 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9
             var role = await GetMockRandomRoleAsync(null, false);
             var result1 = await roleManager.CreateAsync(role);
             Assert.IsTrue(result1.Succeeded);
-            Assert.IsTrue((await userManager.AddToRoleAsync(user, role.Name)).Succeeded);
+            Assert.IsTrue((await userManager.AddToRoleAsync(user, role.Name!)).Succeeded);
 
             // Act
-            var result2 = await userManager.IsInRoleAsync(user, role.Name);
+            var result2 = await userManager.IsInRoleAsync(user, role.Name!);
 
             // Assert
             Assert.IsTrue(result2);
@@ -724,7 +724,7 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9
             // Assert
             Assert.IsTrue(result1.Succeeded);
             var user2 = await userManager.FindByIdAsync(user.Id);
-            Assert.AreEqual(emailAddress, user2.Email);
+            Assert.AreEqual(emailAddress, user2!.Email);
         }
 
         [TestMethod]
@@ -735,10 +735,10 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9
             var user = await GetTestUser(userManager);
 
             // Act
-            var result1 = await userManager.FindByEmailAsync(user.Email);
+            var result1 = await userManager.FindByEmailAsync(user.Email!);
 
             // Assert
-            Assert.AreEqual(user.Id, result1.Id);
+            Assert.AreEqual(user.Id, result1!.Id);
         }
 
         [TestMethod]
@@ -755,7 +755,7 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9
 
             // Assert
             var user2 = await userManager.FindByIdAsync(user.Id);
-            Assert.AreEqual(emailAddress.ToUpperInvariant(), user2.NormalizedEmail);
+            Assert.AreEqual(emailAddress.ToUpperInvariant(), user2!.NormalizedEmail);
         }
 
         // TODO: Register two factor token provider in order for this to work
@@ -1021,7 +1021,7 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9
             var result = await userManager.IsLockedOutAsync(user);
 
             // Assert
-            Assert.IsFalse(false);
+            Assert.IsFalse(result);
         }
 
         [TestMethod]
@@ -1132,15 +1132,15 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9
             var user3 = await GetTestUser(userManager);
             var role = await GetMockRandomRoleAsync(null, false);
             await roleManager.CreateAsync(role);
-            var result1 = await userManager.AddToRoleAsync(user1, role.Name);
+            var result1 = await userManager.AddToRoleAsync(user1, role.Name!);
             Assert.IsTrue(result1.Succeeded);
-            var result2 = await userManager.AddToRoleAsync(user2, role.Name);
+            var result2 = await userManager.AddToRoleAsync(user2, role.Name!);
             Assert.IsTrue(result2.Succeeded);
-            var result3 = await userManager.AddToRoleAsync(user3, role.Name);
+            var result3 = await userManager.AddToRoleAsync(user3, role.Name!);
             Assert.IsTrue(result3.Succeeded);
 
             // Act
-            var result4 = await userManager.GetUsersInRoleAsync(role.Name);
+            var result4 = await userManager.GetUsersInRoleAsync(role.Name!);
 
             // Assert
             Assert.AreEqual(3, result4.Count());
