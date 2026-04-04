@@ -10,6 +10,10 @@ All projects in the solution now inherit their shared version from [Directory.Bu
 
 Bumps the shared solution version, commits the version change, creates a git tag, and optionally pushes the branch and tag.
 
+This script halts immediately if the repository has any uncommitted changes. Commit, stash, or discard local changes before running it.
+
+By default, this script also only runs on the `main` branch. To use it from another branch intentionally, pass `-AllowNonMainBranch`.
+
 If you run it with no arguments, it prompts for:
 
 - breaking, minor, or patch release type
@@ -35,6 +39,9 @@ Examples:
 
 # Create a major release tag with a custom message
 .\scripts\New-ReleaseTag.ps1 -ChangeType Major -Message "Major release v13.0.0" -Push
+
+# Intentionally run from a non-main branch
+.\scripts\New-ReleaseTag.ps1 -ChangeType Patch -Push -AllowNonMainBranch
 ```
 
 Typical outputs:
@@ -71,6 +78,7 @@ Examples:
 ## Notes
 
 - Both scripts are designed to run from the repository root, but they resolve paths safely if launched from elsewhere.
-- `New-ReleaseTag.ps1` requires a clean working tree for non-`WhatIf` runs because it creates a version bump commit and tag.
-- `Set-RepoVersion.ps1` requires a clean working tree only when it is going to commit the version change.
+- `New-ReleaseTag.ps1` requires a clean working tree for all runs. If any files are modified, staged, or untracked, it stops before doing any other work.
+- `New-ReleaseTag.ps1` only runs from `main` by default. Use `-AllowNonMainBranch` if you intentionally need to release from another branch.
+- `Set-RepoVersion.ps1` also requires a clean working tree for all runs and stops immediately if any uncommitted changes are present.
 - Annotated tags are the default for releases.

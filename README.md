@@ -35,6 +35,10 @@ This repository uses a shared solution version stored in [Directory.Build.props]
 
 For local release preparation, use the PowerShell helpers in [scripts/README.md](scripts/README.md) instead of manually editing version numbers or creating tags by hand.
 
+Both release helpers require a clean git working tree. If there are any uncommitted changes, they halt immediately before updating the version, creating a commit, or tagging a release.
+
+`New-ReleaseTag.ps1` also only runs from `main` by default. If you ever need to release from another branch intentionally, use `-AllowNonMainBranch`.
+
 Recommended release flow:
 
 ```powershell

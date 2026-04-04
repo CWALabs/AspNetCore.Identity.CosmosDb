@@ -88,11 +88,12 @@ function Set-VersionConfiguration {
         [string]$NewVersion
     )
 
-    $repoVersionNode = @($Xml.Project.PropertyGroup.RepoVersion) | Where-Object { $_ } | Select-Object -First 1
+    $repoVersionNode = $Xml.Project.PropertyGroup | Select-Object -First 1 | ForEach-Object { $_.RepoVersion }
     if (-not $repoVersionNode) {
         throw "No <RepoVersion> node exists in $Path"
     }
 
+    $repoVersionNode = [System.Xml.XmlElement]$repoVersionNode
     $repoVersionNode.InnerText = $NewVersion
     $Xml.Save($Path)
 }
@@ -167,6 +168,7 @@ function Assert-CleanWorkingTree {
 
 $repoRoot = Invoke-GitCapture -Arguments @("rev-parse", "--show-toplevel")
 Set-Location -LiteralPath $repoRoot
+Assert-CleanWorkingTree
 
 if ($Commit -and $NoCommit) {
     throw "Use either -Commit or -NoCommit, not both."
@@ -224,10 +226,6 @@ if ([string]::IsNullOrWhiteSpace($Message)) {
 if ($interactiveMode) {
     Write-Host "Current version: $currentVersion"
     Write-Host "Next version:    $nextVersion"
-}
-
-if (($Commit -or (-not $NoCommit)) -and -not $WhatIfPreference) {
-    Assert-CleanWorkingTree
 }
 
 if ($PSCmdlet.ShouldProcess($versionFilePath, "Update shared version to $nextVersion")) {

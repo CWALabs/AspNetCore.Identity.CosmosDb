@@ -6,11 +6,13 @@ param(
     [int]$ReleaseCandidateNumber,
     [string]$TagPrefix = "v",
     [string]$Remote = "origin",
+    [string]$MainBranch = "main",
     [string]$Message,
     [switch]$Push,
     [switch]$NoPush,
     [switch]$PushBranch,
-    [switch]$Lightweight
+    [switch]$Lightweight,
+    [switch]$AllowNonMainBranch
 )
 
 $ErrorActionPreference = "Stop"
@@ -92,11 +94,12 @@ function Set-VersionConfiguration {
         [string]$Version
     )
 
-    $repoVersionNode = @($Xml.Project.PropertyGroup.RepoVersion) | Where-Object { $_ } | Select-Object -First 1
+    $repoVersionNode = $Xml.Project.PropertyGroup | Select-Object -First 1 | ForEach-Object { $_.RepoVersion }
     if (-not $repoVersionNode) {
         throw "No <RepoVersion> node exists in $Path"
     }
 
+    $repoVersionNode = [System.Xml.XmlElement]$repoVersionNode
     $repoVersionNode.InnerText = $Version
     $Xml.Save($Path)
 }
@@ -212,8 +215,32 @@ function Assert-CleanWorkingTree {
     }
 }
 
+function Assert-AllowedBranch {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$ExpectedBranch,
+        [Parameter(Mandatory = $true)]
+        [bool]$AllowOverride
+    )
+
+    if ($AllowOverride) {
+        return
+    }
+
+    $currentBranch = Invoke-GitCapture -Arguments @("branch", "--show-current")
+    if ([string]::IsNullOrWhiteSpace($currentBranch)) {
+        throw "Release tagging is only allowed from '$ExpectedBranch' unless -AllowNonMainBranch is specified. Detached HEAD is not allowed by default."
+    }
+
+    if ($currentBranch -ne $ExpectedBranch) {
+        throw "Release tagging is only allowed from '$ExpectedBranch'. Current branch is '$currentBranch'. Use -AllowNonMainBranch to override this safeguard."
+    }
+}
+
 $repoRoot = Invoke-GitCapture -Arguments @("rev-parse", "--show-toplevel")
 Set-Location -LiteralPath $repoRoot
+Assert-CleanWorkingTree
+Assert-AllowedBranch -ExpectedBranch $MainBranch -AllowOverride $AllowNonMainBranch
 
 if ($Push -and $NoPush) {
     throw "Use either -Push or -NoPush, not both."
@@ -301,10 +328,6 @@ if (-not [string]::IsNullOrWhiteSpace($remoteMatch)) {
 
 $versionChanged = $nextVersion -ne $currentVersion
 if ($versionChanged) {
-    if (-not $WhatIfPreference) {
-        Assert-CleanWorkingTree
-    }
-
     if ($PSCmdlet.ShouldProcess($versionFilePath, "Update shared version to $nextVersion")) {
         Set-VersionConfiguration -Xml $versionConfig.Xml -Path $versionFilePath -Version $nextVersion
     }
