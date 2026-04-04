@@ -1,6 +1,6 @@
-# AspNetCore.Identity.CosmosDb.Templates
+# CWALabs.AspNetCore.Identity.CosmosDb.PasskeyTemplates
 
-`AspNetCore.Identity.CosmosDb.Templates` provides `dotnet new` templates for adding passkey (WebAuthn) Razor Pages to any ASP.NET Core project that targets **.NET 10** and uses ASP.NET Core Identity with passkey support.
+`CWALabs.AspNetCore.Identity.CosmosDb.PasskeyTemplates` provides `dotnet new` templates for adding passkey (WebAuthn) Razor Pages to any ASP.NET Core project that targets **.NET 10** and uses ASP.NET Core Identity with passkey support.
 
 [Jump to install instructions](#install-the-templates-package)
 
@@ -65,13 +65,13 @@ The endpoint mapping and client script (`AddCosmosPasskeyUiIntegration` / `MapCo
 Install the templates once into your local `dotnet new` catalog:
 
 ```powershell
-dotnet new install AspNetCore.Identity.CosmosDb.Templates
+dotnet new install CWALabs.AspNetCore.Identity.CosmosDb.PasskeyTemplates
 ```
 
 What this does:
 
 - `dotnet new install` tells the .NET SDK to download and register a template package on your machine.
-- `AspNetCore.Identity.CosmosDb.Templates` is the NuGet package ID for this template pack.
+- `CWALabs.AspNetCore.Identity.CosmosDb.PasskeyTemplates` is the NuGet package ID for this template pack.
 - After installation, the templates become available to the `dotnet new` command and can be scaffolded into compatible projects.
 - This does not modify your current project yet. It only adds these templates to your local template catalog.
 
@@ -89,7 +89,7 @@ What this does:
 To uninstall later:
 
 ```powershell
-dotnet new uninstall AspNetCore.Identity.CosmosDb.Templates
+dotnet new uninstall CWALabs.AspNetCore.Identity.CosmosDb.PasskeyTemplates
 ```
 
 What this does:
@@ -116,10 +116,10 @@ Official documentation:
 
 If you want a complete runnable demo project (not just Razor page items), use:
 
-- [AspNetCore.Identity.CosmosDb.Demo.Template](https://www.nuget.org/packages/AspNetCore.Identity.CosmosDb.Demo.Template) on NuGet
+- [CWALabs.AspNetCore.Identity.CosmosDb.DemoTemplate](https://www.nuget.org/packages/CWALabs.AspNetCore.Identity.CosmosDb.DemoTemplate) on NuGet
 
 ```powershell
-dotnet new install AspNetCore.Identity.CosmosDb.Demo.Template
+dotnet new install CWALabs.AspNetCore.Identity.CosmosDb.DemoTemplate
 dotnet new cosmos-identity-demo -n MyIdentityCosmosDemo
 ```
 
@@ -232,7 +232,7 @@ If you are using the main package from this repository, also see the demo site f
 
 - Repository: [CWALabs/AspNetCore.Identity.CosmosDb](https://github.com/CWALabs/AspNetCore.Identity.CosmosDb)
 - Demo website example: [AspNetCore.Identity.CosmosDb.Demo](https://github.com/CWALabs/AspNetCore.Identity.CosmosDb/tree/main/AspNetCore.Identity.CosmosDb.Demo)
-- Full demo app template package: [AspNetCore.Identity.CosmosDb.Demo.Template](https://www.nuget.org/packages/AspNetCore.Identity.CosmosDb.Demo.Template)
+- Full demo app template package: [CWALabs.AspNetCore.Identity.CosmosDb.DemoTemplate](https://www.nuget.org/packages/CWALabs.AspNetCore.Identity.CosmosDb.DemoTemplate)
 - Main package: [AspNetCore.Identity.CosmosDb](https://www.nuget.org/packages/AspNetCore.Identity.CosmosDb)
 - SkyCMS project: [CWALabs/SkyCMS](https://github.com/CWALabs/SkyCMS)
 

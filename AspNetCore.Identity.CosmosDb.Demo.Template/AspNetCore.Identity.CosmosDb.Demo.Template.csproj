@@ -3,8 +3,8 @@
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <PackageType>Template</PackageType>
-    <PackageId>AspNetCore.Identity.CosmosDb.Demo.Template</PackageId>
-    <Title>AspNetCore.Identity.CosmosDb Demo App Template</Title>
+    <PackageId>CWALabs.AspNetCore.Identity.CosmosDb.DemoTemplate</PackageId>
+    <Title>CWALabs AspNetCore.Identity.CosmosDb Demo App Template</Title>
     <Description>.NET 10 dotnet new project template for a complete ASP.NET Core Identity + Azure Cosmos DB + passkeys demo application.</Description>
     <Authors>AspNetCore.Identity.CosmosDb Contributors</Authors>
     <PackageTags>aspnetcore;identity;cosmosdb;passkey;passkeys;webauthn;fido2;template;dotnetnew;demo;.NET10</PackageTags>

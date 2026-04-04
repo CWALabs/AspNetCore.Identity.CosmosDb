@@ -17,7 +17,7 @@ You can use this demo without cloning the full repository.
 ### Option 1: Scaffold from the demo template package
 
 ```powershell
-dotnet new install AspNetCore.Identity.CosmosDb.Demo.Template
+dotnet new install CWALabs.AspNetCore.Identity.CosmosDb.DemoTemplate
 dotnet new cosmos-identity-demo -n MyIdentityCosmosDemo
 cd MyIdentityCosmosDemo
 dotnet run

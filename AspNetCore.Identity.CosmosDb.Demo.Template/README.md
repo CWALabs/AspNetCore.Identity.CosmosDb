@@ -1,6 +1,6 @@
-# AspNetCore.Identity.CosmosDb.Demo.Template
+# CWALabs.AspNetCore.Identity.CosmosDb.DemoTemplate
 
-`AspNetCore.Identity.CosmosDb.Demo.Template` is a `dotnet new` project template package that scaffolds a complete ASP.NET Core demo app wired for:
+`CWALabs.AspNetCore.Identity.CosmosDb.DemoTemplate` is a `dotnet new` project template package that scaffolds a complete ASP.NET Core demo app wired for:
 
 [Jump to install instructions](#install)
 
@@ -17,13 +17,13 @@ If you notice a version jump (for example to `12.0.0`), that reflects the versio
 ## Install
 
 ```powershell
-dotnet new install AspNetCore.Identity.CosmosDb.Demo.Template
+dotnet new install CWALabs.AspNetCore.Identity.CosmosDb.DemoTemplate
 ```
 
 What this does:
 
 - `dotnet new install` tells the .NET SDK to download and register a template package on your machine.
-- `AspNetCore.Identity.CosmosDb.Demo.Template` is the NuGet package ID for this template pack.
+- `CWALabs.AspNetCore.Identity.CosmosDb.DemoTemplate` is the NuGet package ID for this template pack.
 - After installation, the template becomes available to the `dotnet new` command, just like the built-in project templates that ship with the SDK.
 - This does not create a project yet. It only makes the template available for later use.
 
@@ -36,7 +36,7 @@ dotnet new uninstall
 If you later want to remove this template pack, run:
 
 ```powershell
-dotnet new uninstall AspNetCore.Identity.CosmosDb.Demo.Template
+dotnet new uninstall CWALabs.AspNetCore.Identity.CosmosDb.DemoTemplate
 ```
 
 Official documentation:
@@ -92,7 +92,7 @@ For local development, use the Cosmos DB Emulator.
 ## Related Packages
 
 - Main package: [AspNetCore.Identity.CosmosDb](https://www.nuget.org/packages/AspNetCore.Identity.CosmosDb)
-- Passkey page item templates: [AspNetCore.Identity.CosmosDb.Templates](https://www.nuget.org/packages/AspNetCore.Identity.CosmosDb.Templates)
+- Passkey page item templates: [CWALabs.AspNetCore.Identity.CosmosDb.PasskeyTemplates](https://www.nuget.org/packages/CWALabs.AspNetCore.Identity.CosmosDb.PasskeyTemplates)
 
 ## License
 

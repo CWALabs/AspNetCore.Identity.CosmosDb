@@ -74,8 +74,8 @@ app.MapCosmosPasskeyUiEndpoints<IdentityUser>();
 
 - Repository: [CWALabs/AspNetCore.Identity.CosmosDb](https://github.com/CWALabs/AspNetCore.Identity.CosmosDb)
 - Demo website example: [AspNetCore.Identity.CosmosDb.Demo](https://github.com/CWALabs/AspNetCore.Identity.CosmosDb/tree/main/AspNetCore.Identity.CosmosDb.Demo)
-- Full demo app template package: [AspNetCore.Identity.CosmosDb.Demo.Template](https://www.nuget.org/packages/AspNetCore.Identity.CosmosDb.Demo.Template)
-- Razor page templates package: [AspNetCore.Identity.CosmosDb.Templates](https://www.nuget.org/packages/AspNetCore.Identity.CosmosDb.Templates)
+- Full demo app template package: [CWALabs.AspNetCore.Identity.CosmosDb.DemoTemplate](https://www.nuget.org/packages/CWALabs.AspNetCore.Identity.CosmosDb.DemoTemplate)
+- Razor page templates package: [CWALabs.AspNetCore.Identity.CosmosDb.PasskeyTemplates](https://www.nuget.org/packages/CWALabs.AspNetCore.Identity.CosmosDb.PasskeyTemplates)
 - Templates source in this repo: [AspNetCore.Identity.Razor.PassKeyPage](https://github.com/CWALabs/AspNetCore.Identity.CosmosDb/tree/main/AspNetCore.Identity.Razor.PassKeyPage)
 - SkyCMS project: [CWALabs/SkyCMS](https://github.com/CWALabs/SkyCMS)
 

@@ -1,0 +1,65 @@
+name: CodeQL
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch: {}
+
+permissions:
+  actions: read
+  contents: read
+  security-events: write
+
+jobs:
+  determine-release-metadata:
+    name: Determine Release Metadata
+    runs-on: ubuntu-latest
+    outputs:
+      is_stable_tag: ${{ steps.release-info.outputs.is_stable_tag }}
+      release_tag: ${{ steps.release-info.outputs.release_tag }}
+
+    steps:
+      - name: Determine release metadata
+        id: release-info
+        run: |
+          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            echo "release_tag=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+            if [[ "${GITHUB_REF_NAME}" == *-* ]]; then
+              echo "is_stable_tag=false" >> "$GITHUB_OUTPUT"
+            else
+              echo "is_stable_tag=true" >> "$GITHUB_OUTPUT"
+            fi
+          else
+            echo "release_tag=" >> "$GITHUB_OUTPUT"
+            echo "is_stable_tag=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  analyze:
+    name: Analyze
+    needs: determine-release-metadata
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || needs.determine-release-metadata.outputs.is_stable_tag == 'true'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: csharp
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --no-restore -c Release
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3

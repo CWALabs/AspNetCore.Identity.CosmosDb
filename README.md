@@ -26,8 +26,8 @@ This repository is part of the [SkyCMS](https://github.com/CWALabs/SkyCMS) ecosy
 ## Packages
 
 - [`AspNetCore.Identity.CosmosDb`](https://www.nuget.org/packages/AspNetCore.Identity.CosmosDb): main Identity provider package
-- [`AspNetCore.Identity.CosmosDb.Demo.Template`](https://www.nuget.org/packages/AspNetCore.Identity.CosmosDb.Demo.Template): full demo app `dotnet new` project template
-- [`AspNetCore.Identity.CosmosDb.Templates`](https://www.nuget.org/packages/AspNetCore.Identity.CosmosDb.Templates): Razor page templates for passkey UI integration
+- [`CWALabs.AspNetCore.Identity.CosmosDb.DemoTemplate`](https://www.nuget.org/packages/CWALabs.AspNetCore.Identity.CosmosDb.DemoTemplate): full demo app `dotnet new` project template
+- [`CWALabs.AspNetCore.Identity.CosmosDb.PasskeyTemplates`](https://www.nuget.org/packages/CWALabs.AspNetCore.Identity.CosmosDb.PasskeyTemplates): Razor page templates for passkey UI integration
 
 ## Release And Versioning
 
@@ -245,7 +245,7 @@ app.MapCosmosPasskeyUiEndpoints<IdentityUser>();
 Install the templates package:
 
 ```powershell
-dotnet new install AspNetCore.Identity.CosmosDb.Templates
+dotnet new install CWALabs.AspNetCore.Identity.CosmosDb.PasskeyTemplates
 ```
 
 Then scaffold the pages:
@@ -266,7 +266,7 @@ If you want the demo **without cloning this repository**, two options are availa
 - Install and scaffold the full demo app template package:
 
 ```powershell
-dotnet new install AspNetCore.Identity.CosmosDb.Demo.Template
+dotnet new install CWALabs.AspNetCore.Identity.CosmosDb.DemoTemplate
 dotnet new cosmos-identity-demo -n MyIdentityCosmosDemo
 ```
 
