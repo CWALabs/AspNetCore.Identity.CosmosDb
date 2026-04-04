@@ -4,7 +4,6 @@
     <PackageType>Template</PackageType>
 	<TargetFramework>net10.0</TargetFramework>
     <PackageId>AspNetCore.Identity.CosmosDb.Templates</PackageId>
-    <PackageVersion>12.0.1</PackageVersion>
     <Title>AspNetCore.Identity.CosmosDb Templates</Title>
   <Description>.NET 10 dotnet new templates for passkey-enabled ASP.NET Core Identity login and passkey management Razor Pages. Works with any Identity provider that supports passkeys and compatible endpoints.</Description>
     <Authors>AspNetCore.Identity.CosmosDb Contributors</Authors>
@@ -18,9 +17,6 @@
     <PackageProjectUrl>https://github.com/CWALabs/AspNetCore.Identity.CosmosDb</PackageProjectUrl>
     <RepositoryUrl>https://github.com/CWALabs/AspNetCore.Identity.CosmosDb</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <Version>12.0.1</Version>
-    <FileVersion>12.0.1</FileVersion>
-    <AssemblyVersion>12.0.1</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>

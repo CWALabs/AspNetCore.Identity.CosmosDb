@@ -5,6 +5,8 @@
 
 `AspNetCore.Identity.CosmosDb` is a Cosmos DB-backed implementation of ASP.NET Core Identity built on Entity Framework Core Cosmos. It gives ASP.NET Core applications a non-relational Identity store with support for users, roles, claims, tokens, external logins, and passkeys.
 
+[Jump to install instructions](#install-in-an-aspnet-core-mvc-or-razor-pages-app)
+
 This repository is part of the [SkyCMS](https://github.com/CWALabs/SkyCMS) ecosystem and contains the core package, a runnable demo site, passkey page templates, and the test suites used to validate the library.
 
 ## Repository Contents
@@ -22,6 +24,41 @@ This repository is part of the [SkyCMS](https://github.com/CWALabs/SkyCMS) ecosy
 - [`AspNetCore.Identity.CosmosDb`](https://www.nuget.org/packages/AspNetCore.Identity.CosmosDb): main Identity provider package
 - [`AspNetCore.Identity.CosmosDb.Demo.Template`](https://www.nuget.org/packages/AspNetCore.Identity.CosmosDb.Demo.Template): full demo app `dotnet new` project template
 - [`AspNetCore.Identity.CosmosDb.Templates`](https://www.nuget.org/packages/AspNetCore.Identity.CosmosDb.Templates): Razor page templates for passkey UI integration
+
+## Release And Versioning
+
+This repository uses a shared solution version stored in [Directory.Build.props](Directory.Build.props). All projects in the solution inherit that version so package, demo, and test artifacts stay aligned.
+
+For local release preparation, use the PowerShell helpers in [scripts/README.md](scripts/README.md) instead of manually editing version numbers or creating tags by hand.
+
+Recommended release flow:
+
+```powershell
+# Interactive release flow: bump version, commit it, create tag, optionally push
+.\scripts\New-ReleaseTag.ps1
+```
+
+Useful command-line examples:
+
+```powershell
+# Preview the next patch release without changing anything
+.\scripts\New-ReleaseTag.ps1 -ChangeType Patch -NoPush -WhatIf
+
+# Create and push a stable minor release
+.\scripts\New-ReleaseTag.ps1 -ChangeType Minor -Push
+
+# Create and push a release candidate tag
+.\scripts\New-ReleaseTag.ps1 -ChangeType Patch -ReleaseCandidateNumber 1 -Push
+
+# Only bump the shared repo version without tagging
+.\scripts\Set-RepoVersion.ps1 -ChangeType Patch -Commit
+```
+
+The NuGet publish workflow validates that the pushed tag matches `RepoVersion` before packaging and publishing. In practice, that means:
+
+- stable release tags should look like `v12.0.1`
+- release candidate tags should look like `v12.0.1-rc1`
+- the `12.0.1` part must match `RepoVersion` in [Directory.Build.props](Directory.Build.props)
 
 ## What The Library Does
 
@@ -41,6 +78,8 @@ This repository is part of the [SkyCMS](https://github.com/CWALabs/SkyCMS) ecosy
 ## Install In An ASP.NET Core MVC Or Razor Pages App
 
 The registration is the same for MVC and Razor Pages. The only difference is whether you add `AddControllersWithViews()` or `AddRazorPages()` and how you map routes.
+
+If you want a complete working reference before wiring this up yourself, see the demo app in [AspNetCore.Identity.CosmosDb.Demo/README.md](AspNetCore.Identity.CosmosDb.Demo/README.md).
 
 ### 1. Install the package
 
@@ -98,32 +137,58 @@ var builder = WebApplication.CreateBuilder(args);
 
 var connectionString = builder.Configuration.GetConnectionString("CosmosDb")!;
 var databaseName = builder.Configuration["CosmosDb:DatabaseName"]!;
+var passkeyServerDomain = builder.Configuration["Passkeys:ServerDomain"];
+
+if (string.IsNullOrWhiteSpace(passkeyServerDomain))
+{
+  if (builder.Environment.IsDevelopment())
+  {
+    passkeyServerDomain = "localhost";
+  }
+  else
+  {
+    throw new InvalidOperationException("Passkeys:ServerDomain must be configured outside Development.");
+  }
+}
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseCosmos(connectionString, databaseName));
 
 builder.Services.Configure<IdentityPasskeyOptions>(options =>
 {
-    options.ServerDomain = builder.Configuration["Passkeys:ServerDomain"]!;
+  options.ServerDomain = passkeyServerDomain;
+  options.AuthenticatorTimeout = TimeSpan.FromMinutes(3);
+  options.ChallengeSize = 32;
 });
 
 builder.Services
     .AddCosmosIdentity<ApplicationDbContext, IdentityUser, IdentityRole, string>(options =>
     {
+    options.Password.RequireDigit = true;
+    options.Password.RequireLowercase = true;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireUppercase = true;
+    options.Password.RequiredLength = 8;
         options.User.RequireUniqueEmail = true;
         options.SignIn.RequireConfirmedAccount = true;
-    })
+  }, TimeSpan.FromHours(8), slidingExpiration: true)
     .AddDefaultTokenProviders()
     .AddDefaultUI();
 
+builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
-// builder.Services.AddControllersWithViews();
 ```
 
 ### 5. Ensure the database and containers exist
 
 ```csharp
 var app = builder.Build();
+
+if (!app.Environment.IsDevelopment())
+{
+  app.UseExceptionHandler("/Home/Error");
+  app.UseHsts();
+}
 
 using (var scope = app.Services.CreateScope())
 {
@@ -141,8 +206,9 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapControllers();
 app.MapRazorPages();
-// app.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
+app.MapDefaultControllerRoute();
 
 app.Run();
 ```

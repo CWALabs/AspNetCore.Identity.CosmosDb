@@ -2,6 +2,8 @@
 
 `AspNetCore.Identity.CosmosDb.Templates` provides `dotnet new` templates for adding passkey (WebAuthn) Razor Pages to any ASP.NET Core project that targets **.NET 10** and uses ASP.NET Core Identity with passkey support.
 
+[Jump to install instructions](#install-the-templates-package)
+
 ## Versioning Note
 
 This NuGet package now uses SemVer 2.0 package numbering and no longer mirrors the target .NET version number.
@@ -66,17 +68,42 @@ Install the templates once into your local `dotnet new` catalog:
 dotnet new install AspNetCore.Identity.CosmosDb.Templates
 ```
 
+What this does:
+
+- `dotnet new install` tells the .NET SDK to download and register a template package on your machine.
+- `AspNetCore.Identity.CosmosDb.Templates` is the NuGet package ID for this template pack.
+- After installation, the templates become available to the `dotnet new` command and can be scaffolded into compatible projects.
+- This does not modify your current project yet. It only adds these templates to your local template catalog.
+
 To confirm the templates are available:
 
 ```powershell
 dotnet new list cosmos-passkeys
 ```
 
+What this does:
+
+- `dotnet new list` shows templates available on your machine.
+- `cosmos-passkeys` is used as a filter so you only see the passkey templates from this package instead of every installed template.
+
 To uninstall later:
 
 ```powershell
 dotnet new uninstall AspNetCore.Identity.CosmosDb.Templates
 ```
+
+What this does:
+
+- `dotnet new uninstall` removes the installed template package from your local template catalog.
+- It does not delete projects you already created from the template. It only removes the ability to scaffold new items from this package until you install it again.
+
+Official documentation:
+
+- [`dotnet new` command](https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-new)
+- [`dotnet new install` command](https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-new-install)
+- [`dotnet new list` command](https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-new-list)
+- [`dotnet new uninstall` command](https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-new-uninstall)
+- [Custom templates for `dotnet new`](https://learn.microsoft.com/en-us/dotnet/core/tools/custom-templates)
 
 ## Quick start
 

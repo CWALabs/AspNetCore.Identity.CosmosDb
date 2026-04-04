@@ -24,6 +24,24 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.0.x
+      - name: Validate tag matches repo version
+        run: |
+          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            repo_version=$(grep -oPm1 '(?<=<RepoVersion>)[^<]+' Directory.Build.props)
+            if [[ -z "$repo_version" ]]; then
+              echo "RepoVersion was not found in Directory.Build.props"
+              exit 1
+            fi
+
+            tag_version="${GITHUB_REF_NAME#v}"
+            tag_core_version="${tag_version%%-*}"
+
+            if [[ "$tag_core_version" != "$repo_version" ]]; then
+              echo "Tag version '$tag_version' does not match RepoVersion '$repo_version'."
+              echo "Expected a tag like 'v$repo_version' or 'v$repo_version-rcN'."
+              exit 1
+            fi
+          fi
       - name: Restore
         run: dotnet restore
       - name: Build
@@ -48,8 +66,12 @@ jobs:
         run: dotnet pack AspNetCore.Identity.Razor.PassKeyPage/AspNetCore.Identity.Razor.PassKeyPage.csproj -c Release --no-build --no-restore -o ./nupkg
       - name: Pack demo project template
         run: dotnet pack AspNetCore.Identity.CosmosDb.Demo.Template/AspNetCore.Identity.CosmosDb.Demo.Template.csproj -c Release --no-build --no-restore -o ./nupkg
-      - name: Publish NuGet packages
-        run: dotnet nuget push "${{ github.workspace }}/nupkg/*.nupkg" --api-key ${{ secrets.NUGET_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+      - name: Publish main library package
+        run: dotnet nuget push "${{ github.workspace }}/nupkg/AspNetCore.Identity.CosmosDb.*.nupkg" --api-key ${{ secrets.NUGET_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+      - name: Publish passkey template package
+        run: dotnet nuget push "${{ github.workspace }}/nupkg/AspNetCore.Identity.CosmosDb.Templates.*.nupkg" --api-key ${{ secrets.NUGET_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+      - name: Publish demo app template package
+        run: dotnet nuget push "${{ github.workspace }}/nupkg/AspNetCore.Identity.CosmosDb.Demo.Template.*.nupkg" --api-key ${{ secrets.NUGET_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
       - name: Publish NuGet symbols
         run: dotnet nuget push "${{ github.workspace }}/nupkg/*.snupkg" --api-key ${{ secrets.NUGET_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
       - name: Upload package artifacts

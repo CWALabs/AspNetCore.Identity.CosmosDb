@@ -1,0 +1,9 @@
+<Project>
+  <PropertyGroup>
+    <RepoVersion>12.0.1</RepoVersion>
+    <Version>$(RepoVersion)</Version>
+    <PackageVersion Condition="'$(PackageVersion)' == ''">$(Version)</PackageVersion>
+    <FileVersion Condition="'$(FileVersion)' == ''">$(RepoVersion)</FileVersion>
+    <AssemblyVersion Condition="'$(AssemblyVersion)' == ''">$(RepoVersion)</AssemblyVersion>
+  </PropertyGroup>
+</Project>
