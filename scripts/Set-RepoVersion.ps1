@@ -65,8 +65,13 @@ function Get-VersionConfiguration {
     }
 
     [xml]$xml = Get-Content -LiteralPath $Path -Raw
-    $repoVersionNode = $xml.GetElementsByTagName("RepoVersion") | Select-Object -First 1
-    $repoVersion = $repoVersionNode?.InnerText
+    $repoVersionNodes = $xml.GetElementsByTagName("RepoVersion")
+    if ($null -eq $repoVersionNodes -or $repoVersionNodes.Count -eq 0) {
+        throw "No <RepoVersion> element was found in $Path"
+    }
+
+    $repoVersionNode = $repoVersionNodes.Item(0)
+    $repoVersion = $repoVersionNode.InnerText
 
     if ([string]::IsNullOrWhiteSpace($repoVersion)) {
         throw "No <RepoVersion> element was found in $Path"
@@ -89,11 +94,12 @@ function Set-VersionConfiguration {
         [string]$NewVersion
     )
 
-    $repoVersionNode = $Xml.GetElementsByTagName("RepoVersion") | Select-Object -First 1
-    if (-not $repoVersionNode) {
+    $repoVersionNodes = $Xml.GetElementsByTagName("RepoVersion")
+    if ($null -eq $repoVersionNodes -or $repoVersionNodes.Count -eq 0) {
         throw "No <RepoVersion> node exists in $Path"
     }
 
+    $repoVersionNode = $repoVersionNodes.Item(0)
     $repoVersionNode.InnerText = $NewVersion
     $Xml.Save($Path)
 }
