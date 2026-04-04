@@ -19,20 +19,6 @@ This means you may see a larger version jump (for example, from a .NET-aligned v
 - Generic key support
 - Reusable passkey endpoints and packaged JavaScript client
 
-## Screenshots
-
-### Home
-
-![Home page screenshot](https://raw.githubusercontent.com/CWALabs/AspNetCore.Identity.CosmosDb/main/AspNetCore.Identity.CosmosDb.Demo/wwwroot/images/Index_cshtml.png)
-
-### Login
-
-![Login page screenshot](https://raw.githubusercontent.com/CWALabs/AspNetCore.Identity.CosmosDb/main/AspNetCore.Identity.CosmosDb.Demo/wwwroot/images/Login_cshtml.png)
-
-### Passkeys
-
-![Passkeys page screenshot](https://raw.githubusercontent.com/CWALabs/AspNetCore.Identity.CosmosDb/main/AspNetCore.Identity.CosmosDb.Demo/wwwroot/images/Passkeys_cshtml.png)
-
 ## Install
 
 ```powershell
