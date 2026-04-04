@@ -5,6 +5,10 @@
 
 `AspNetCore.Identity.CosmosDb` is a .NET 10 ASP.NET Core Identity provider backed by Azure Cosmos DB and EF Core Cosmos. It stores users, roles, claims, tokens, external logins, and passkeys in Cosmos DB while preserving the standard ASP.NET Core Identity programming model.
 
+> [!IMPORTANT]
+> **Breaking change:** This release line moved to `.NET 10` and adds ASP.NET Core Identity passkey support.
+> Detailed migration and impact notes: [`.NET 10 + Passkey Upgrade Summary`](https://github.com/CWALabs/AspNetCore.Identity.CosmosDb/blob/main/BREAKING_CHANGES_NET10.md)
+
 ## Versioning Note
 
 Package versions now follow SemVer 2.0 for NuGet publishing and no longer mirror the target .NET version number.

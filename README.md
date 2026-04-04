@@ -5,6 +5,10 @@
 
 `AspNetCore.Identity.CosmosDb` is a Cosmos DB-backed implementation of ASP.NET Core Identity built on Entity Framework Core Cosmos. It gives ASP.NET Core applications a non-relational Identity store with support for users, roles, claims, tokens, external logins, and passkeys.
 
+> [!IMPORTANT]
+> **Breaking change:** The repository has moved to `.NET 10` and now includes first-class ASP.NET Core Identity passkey support.
+> See [`.NET 10 + Passkey Upgrade Summary`](BREAKING_CHANGES_NET10.md) for migration-impact details and change scope.
+
 [Jump to install instructions](#install-in-an-aspnet-core-mvc-or-razor-pages-app)
 
 This repository is part of the [SkyCMS](https://github.com/CWALabs/SkyCMS) ecosystem and contains the core package, a runnable demo site, passkey page templates, and the test suites used to validate the library.

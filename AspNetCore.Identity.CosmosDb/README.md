@@ -9,6 +9,10 @@ This folder contains the source code for the `AspNetCore.Identity.CosmosDb` NuGe
 - **Package README** (NuGet.org-facing): [PACKAGE_README.md](PACKAGE_README.md)
 - **Repository README** (this repo): [../README.md](../README.md)
 
+> [!IMPORTANT]
+> **Breaking change:** This package moved to `.NET 10` and now includes ASP.NET Core Identity passkey support.
+> See [`.NET 10 + Passkey Upgrade Summary`](../BREAKING_CHANGES_NET10.md) for migration-impact details and full scope.
+
 ---
 
 ## Project Structure
