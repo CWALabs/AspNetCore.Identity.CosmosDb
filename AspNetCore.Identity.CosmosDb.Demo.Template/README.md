@@ -8,6 +8,9 @@
 - Azure Cosmos DB via `AspNetCore.Identity.CosmosDb`
 - Passkey (WebAuthn) endpoints and UI
 
+> [!NOTE]
+> **This is a packaging project, not a standalone app.** It contains no source code of its own. At pack time it bundles the files from [`AspNetCore.Identity.CosmosDb.Demo`](../AspNetCore.Identity.CosmosDb.Demo/README.md) into a NuGet template package so users can run `dotnet new cosmos-identity-demo` to scaffold a copy without cloning the repository. If you want to run or modify the demo directly, open the `Demo` project instead.
+
 ## Versioning Note
 
 Package versions for this template now follow SemVer 2.0 and no longer track the target .NET version number.

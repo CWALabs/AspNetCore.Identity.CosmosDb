@@ -2,6 +2,9 @@
 
 This demo application showcases ASP.NET Core Identity integrated with Azure Cosmos DB and PassKey authentication support.
 
+> [!NOTE]
+> **This is the source project for the demo app.** If you are looking for the `dotnet new` template that lets you scaffold this demo without cloning the repository, see [`AspNetCore.Identity.CosmosDb.Demo.Template`](../AspNetCore.Identity.CosmosDb.Demo.Template/README.md). That project is a packaging wrapper — it contains no source code of its own, it simply bundles the files from this folder into a NuGet template package.
+
 ## Features
 
 - **ASP.NET Core Identity** with Cosmos DB backing

@@ -16,8 +16,8 @@ This repository is part of the [SkyCMS](https://github.com/CWALabs/SkyCMS) ecosy
 ## Repository Contents
 
 - `AspNetCore.Identity.CosmosDb/`: the main library and NuGet package
-- `AspNetCore.Identity.CosmosDb.Demo/`: sample ASP.NET Core app showing the package in use
-- `AspNetCore.Identity.CosmosDb.Demo.Template/`: `dotnet new` project template for scaffolding the complete demo app
+- `AspNetCore.Identity.CosmosDb.Demo/`: the runnable demo app — this is the actual source code for the sample website
+- `AspNetCore.Identity.CosmosDb.Demo.Template/`: a packaging-only project that wraps `Demo/` into a [`dotnet new` project template](https://learn.microsoft.com/dotnet/core/tools/custom-templates) NuGet package (it contains no source code of its own)
 - `AspNetCore.Identity.Razor.PassKeyPage/`: `dotnet new` templates for passkey login and passkey management pages
 - `AspNetCore.Identity.CosmosDb.Tests/`: primary automated test suite
 - `AspNetCore.Identity.CosmosDbCompat.Tests/`: API compatibility regression suite used during framework and package upgrades
@@ -260,6 +260,9 @@ The templates package is provider-agnostic at the page-model level and is docume
 ## Demo Website
 
 The repository includes [AspNetCore.Identity.CosmosDb.Demo](AspNetCore.Identity.CosmosDb.Demo), a runnable example that shows how to configure the package, provision Cosmos DB, and use the passkey integration end to end.
+
+> [!NOTE]
+> **Demo vs Demo.Template:** The `Demo` project is the actual application source code. The `Demo.Template` project is a packaging wrapper that bundles those same files into a `dotnet new` project template NuGet package. They are not two separate apps — `Demo.Template` simply re-packages `Demo` so users can scaffold a copy without cloning this repository.
 
 If you want the demo **without cloning this repository**, two options are available:
 

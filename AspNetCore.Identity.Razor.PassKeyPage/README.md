@@ -1,6 +1,6 @@
 # CWALabs.AspNetCore.Identity.CosmosDb.PasskeyTemplates
 
-`CWALabs.AspNetCore.Identity.CosmosDb.PasskeyTemplates` provides `dotnet new` templates for adding passkey (WebAuthn) Razor Pages to any ASP.NET Core project that targets **.NET 10** and uses ASP.NET Core Identity with passkey support.
+`AspNetCore.Identity.Razor.PassKeyPage` provides `dotnet new` templates for adding passkey (WebAuthn) Razor Pages to any ASP.NET Core project that targets **.NET 10** and uses ASP.NET Core Identity with passkey support.
 
 [Jump to install instructions](#install-the-templates-package)
 

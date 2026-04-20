@@ -15,7 +15,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
 
-namespace namespace AspNetCore.Identity.PassKey.Template.Pages;
+namespace namespace AspNetCore.Identity.Razor.PassKeyPage.Pages;
 
 public class LoginModel : PageModel
 {

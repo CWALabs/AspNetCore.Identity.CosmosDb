@@ -3,7 +3,7 @@
   <PropertyGroup>
     <PackageType>Template</PackageType>
 	<TargetFramework>net10.0</TargetFramework>
-    <PackageId>AspNetCore.Identity.Passkey.Templates</PackageId>
+    <PackageId>AspNetCore.Identity.Razor.PassKeyPage</PackageId>
     <Title>AspNetCore Identity Passkey Page Templates</Title>
   <Description>.NET 10 dotnet new templates for passkey-enabled ASP.NET Core Identity login and passkey management Razor Pages. Works with any Identity provider that supports passkeys and compatible endpoints.</Description>
     <Authors>AspNetCore.Identity.CosmosDb Contributors</Authors>
