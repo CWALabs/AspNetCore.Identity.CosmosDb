@@ -1,6 +1,6 @@
 {
   "$schema": "http://json.schemastore.org/template",
-  "author": "AspNetCore.Identity.CosmosDb Contributors",
+  "author": "CWALabs",
   "classifications": ["Web", "Identity", "Passkey", "CosmosDB", "Razor Pages"],
   "identity": "AspNetCore.Identity.CosmosDb.PasskeyLogin.CSharp.1.0",
   "name": "CosmosDB Passkey Login Page",
