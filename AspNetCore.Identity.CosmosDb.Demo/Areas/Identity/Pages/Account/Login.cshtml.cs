@@ -108,7 +108,6 @@ namespace AspNetCore.Identity.CosmosDb.Demo.Areas.Identity.Pages.Account
             public object ClientExtensionResults { get; set; }
         }
 
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> OnPostPasskeyAssertionOptionsAsync([FromBody] PasskeyOptionsRequest request)
         {
             IdentityUser user = null;
@@ -122,7 +121,6 @@ namespace AspNetCore.Identity.CosmosDb.Demo.Areas.Identity.Pages.Account
             return Content(optionsJson, "application/json");
         }
 
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> OnPostPasskeyLoginAsync([FromBody] PasskeyLoginRequest request, string returnUrl = null)
         {
             returnUrl ??= Url.Content("~/");

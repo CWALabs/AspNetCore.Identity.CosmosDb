@@ -69,7 +69,7 @@ jobs:
       - name: Publish main library package
         run: dotnet nuget push "${{ github.workspace }}/nupkg/AspNetCore.Identity.CosmosDb.*.nupkg" --api-key ${{ secrets.NUGET_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
       - name: Publish passkey template package
-        run: dotnet nuget push "${{ github.workspace }}/nupkg/CWALabs.AspNetCore.Identity.CosmosDb.PasskeyTemplates.*.nupkg" --api-key ${{ secrets.NUGET_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+        run: dotnet nuget push "${{ github.workspace }}/nupkg/AspNetCore.Identity.Razor.PassKeyPage.*.nupkg" --api-key ${{ secrets.NUGET_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
       - name: Publish demo app template package
         run: dotnet nuget push "${{ github.workspace }}/nupkg/CWALabs.AspNetCore.Identity.CosmosDb.DemoTemplate.*.nupkg" --api-key ${{ secrets.NUGET_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
       - name: Publish NuGet symbols
