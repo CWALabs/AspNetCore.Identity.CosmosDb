@@ -14,17 +14,23 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
+using AspNetCore.Identity.CosmosDb.Passkeys;
 
 namespace AspNetCore.Identity.CosmosDb.Demo.Areas.Identity.Pages.Account
 {
     public class LoginModel : PageModel
     {
         private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly UserManager<IdentityUser> _userManager;
         private readonly ILogger<LoginModel> _logger;
 
-        public LoginModel(SignInManager<IdentityUser> signInManager, ILogger<LoginModel> logger)
+        public LoginModel(
+            SignInManager<IdentityUser> signInManager,
+            UserManager<IdentityUser> userManager,
+            ILogger<LoginModel> logger)
         {
             _signInManager = signInManager;
+            _userManager = userManager;
             _logger = logger;
         }
 
@@ -86,6 +92,73 @@ namespace AspNetCore.Identity.CosmosDb.Demo.Areas.Identity.Pages.Account
             public string PasskeyCredentialJson { get; set; }
 
             public string PasskeyError { get; set; }
+        }
+
+        public sealed class PasskeyOptionsRequest
+        {
+            public string UserName { get; set; }
+        }
+
+        public sealed class PasskeyLoginRequest
+        {
+            public string Id { get; set; }
+            public string RawId { get; set; }
+            public string Type { get; set; }
+            public object Response { get; set; }
+            public object ClientExtensionResults { get; set; }
+        }
+
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> OnPostPasskeyAssertionOptionsAsync([FromBody] PasskeyOptionsRequest request)
+        {
+            IdentityUser user = null;
+            if (!string.IsNullOrWhiteSpace(request?.UserName))
+            {
+                user = await _userManager.FindByNameAsync(request.UserName)
+                    ?? await _userManager.FindByEmailAsync(request.UserName);
+            }
+
+            var optionsJson = await _signInManager.MakePasskeyRequestOptionsAsync(user);
+            return Content(optionsJson, "application/json");
+        }
+
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> OnPostPasskeyLoginAsync([FromBody] PasskeyLoginRequest request, string returnUrl = null)
+        {
+            returnUrl ??= Url.Content("~/");
+
+            if (request is null)
+            {
+                return BadRequest(new { success = false, message = "Invalid passkey payload." });
+            }
+
+            var credentialJson = System.Text.Json.JsonSerializer.Serialize(request);
+            var result = await _signInManager.PasskeySignInAsync(credentialJson);
+
+            if (result.Succeeded)
+            {
+                _logger.LogInformation("User logged in with a passkey.");
+                return new JsonResult(new { success = true, redirectUrl = returnUrl });
+            }
+
+            if (result.IsLockedOut)
+            {
+                _logger.LogWarning("User account locked out during passkey sign-in.");
+                return new JsonResult(new { success = false, redirectUrl = Url.Page("./Lockout") });
+            }
+
+            if (result.IsNotAllowed)
+            {
+                return new JsonResult(new { success = false, message = "Passkey sign-in is not allowed for this account." })
+                {
+                    StatusCode = StatusCodes.Status401Unauthorized
+                };
+            }
+
+            return new JsonResult(new { success = false, message = "Invalid passkey login attempt." })
+            {
+                StatusCode = StatusCodes.Status401Unauthorized
+            };
         }
 
         public async Task OnGetAsync(string returnUrl = null)

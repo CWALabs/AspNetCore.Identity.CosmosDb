@@ -1,4 +1,5 @@
 # Copilot Instructions
 
 ## Project Guidelines
-- PassKey support is an absolute requirement for this .NET 10 upgrade and must be implemented (entities, logic, and related support).
+- PassKey support is an absolute requirement for this .NET 10 upgrade and must be implemented (entities, logic, and related support). Prefer leveraging built-in ASP.NET Core Identity (.NET 10) passkey functionality as much as possible instead of custom implementations.
+- Ensure to implement the AspNetCore.Identity.CosmosDb passkey concurrency fix by adding a module-level `passkeyInProgress` flag to `identity-passkeys.js`. This fix guards both `addPasskeyAsync` and `submitLoginCredential` with early returns (if `passkeyInProgress` return), disables UI buttons (`addButton.disabled`, `loginButton.disabled`) during operations, and uses try/finally for cleanup ensuring the flag always resets. It prevents race conditions between conditional mediation auto-trigger and manual button clicks. When updating `identity-passkeys.js`, ALWAYS maintain this concurrency guard pattern. This is documented in the PASSKEY_DEVELOPER_GUIDE.md Best Practices section #6 and Troubleshooting section for future maintainers. Additionally, this fix addresses the "A request is already pending" WebAuthn error.

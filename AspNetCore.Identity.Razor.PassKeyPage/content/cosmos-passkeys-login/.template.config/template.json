@@ -26,5 +26,8 @@
       "defaultValue": "IdentityUser",
       "replaces": "IdentityUser"
     }
-  }
+  },
+  "sources": [
+    {}
+  ]
 }

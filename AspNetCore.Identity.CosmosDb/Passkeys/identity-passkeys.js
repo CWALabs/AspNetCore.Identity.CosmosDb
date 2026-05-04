@@ -1,4 +1,7 @@
 (function () {
+    // Guard against concurrent WebAuthn requests
+    let passkeyInProgress = false;
+
     function parseOptionsJson(response) {
         if (!response.ok) {
             throw new Error("The server responded with status " + response.status + ".");
@@ -104,46 +107,63 @@
             .replace(/'/g, "&#039;");
     }
 
-    async function addPasskeyAsync(apiBase, statusElement) {
+    async function addPasskeyAsync(apiBase, statusElement, addButton) {
+        if (passkeyInProgress) {
+            return;
+        }
+
         if (!window.PublicKeyCredential || !navigator.credentials) {
             throw new Error("Passkeys are not supported in this browser.");
         }
 
-        const optionsResponse = await fetchWithDefaults(apiBase + "/creation-options", { method: "POST" });
-        const optionsJson = await parseOptionsJson(optionsResponse);
-        const publicKeyOptions = PublicKeyCredential.parseCreationOptionsFromJSON(optionsJson);
-        const credential = await navigator.credentials.create({ publicKey: publicKeyOptions });
-
-        if (!credential) {
-            throw new Error("No credential was returned by the browser.");
+        passkeyInProgress = true;
+        if (addButton) {
+            addButton.disabled = true;
         }
 
-        const providedName = window.prompt("Name this passkey (optional)", "");
-        const passkeyName = providedName ? providedName.trim() : "";
+        try {
+            const optionsResponse = await fetchWithDefaults(apiBase + "/creation-options", { method: "POST" });
+            const optionsJson = await parseOptionsJson(optionsResponse);
+            const publicKeyOptions = PublicKeyCredential.parseCreationOptionsFromJSON(optionsJson);
+            const credential = await navigator.credentials.create({ publicKey: publicKeyOptions });
 
-        const credentialJson = serializeCredential(credential);
-        const registerResponse = await fetchWithDefaults(apiBase + "/register", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ credentialJson: credentialJson, name: passkeyName })
-        });
-
-        if (!registerResponse.ok) {
-            let errorBody = null;
-            try {
-                errorBody = await registerResponse.json();
-            } catch {
-                errorBody = null;
+            if (!credential) {
+                throw new Error("No credential was returned by the browser.");
             }
 
-            if (registerResponse.status === 401) {
-                throw new Error((errorBody && errorBody.error) || "Your sign-in session is no longer valid. Please sign in again and retry passkey registration.");
+            const providedName = window.prompt("Name this passkey (optional)", "");
+            const passkeyName = providedName ? providedName.trim() : "";
+
+            const credentialJson = serializeCredential(credential);
+            const registerResponse = await fetchWithDefaults(apiBase + "/register", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ credentialJson: credentialJson, name: passkeyName })
+            });
+
+            if (!registerResponse.ok) {
+                let errorBody = null;
+                try {
+                    errorBody = await registerResponse.json();
+                } catch {
+                    errorBody = null;
+                }
+
+                if (registerResponse.status === 401) {
+                    throw new Error((errorBody && errorBody.error) || "Your sign-in session is no longer valid. Please sign in again and retry passkey registration.");
+                }
+
+                throw new Error((errorBody && errorBody.error) || ("Passkey registration failed (" + registerResponse.status + ")."));
             }
 
-            throw new Error((errorBody && errorBody.error) || ("Passkey registration failed (" + registerResponse.status + ")."));
+            showStatus(statusElement, "Passkey registered.", "success");
         }
-
-        showStatus(statusElement, "Passkey registered.", "success");
+        finally {
+            passkeyInProgress = false;
+            if (addButton) {
+                addButton.disabled = false;
+            }
+        }
     }
 
     async function loadPasskeysAsync(apiBase, tableBody, statusElement) {
@@ -207,7 +227,12 @@
         return await navigator.credentials.get({ publicKey: options, mediation: mediation });
     }
 
-    async function submitLoginCredential(config, useConditionalMediation) {
+    async function submitLoginCredential(config, useConditionalMediation, loginButton) {
+        // Guard against concurrent WebAuthn requests
+        if (passkeyInProgress) {
+            return;
+        }
+
         const form = document.querySelector(config.formSelector || "form");
         if (!form) {
             return;
@@ -223,6 +248,11 @@
 
         credentialField.value = "";
         errorField.value = "";
+
+        passkeyInProgress = true;
+        if (loginButton && !useConditionalMediation) {
+            loginButton.disabled = true;
+        }
 
         try {
             const mediation = useConditionalMediation ? "conditional" : undefined;
@@ -245,6 +275,12 @@
                 ? "No passkey was provided by the authenticator."
                 : ((error && error.message) || "Passkey authentication failed.");
         }
+        finally {
+            passkeyInProgress = false;
+            if (loginButton && !useConditionalMediation) {
+                loginButton.disabled = false;
+            }
+        }
 
         form.submit();
     }
@@ -263,7 +299,7 @@
         addButton.addEventListener("click", async function () {
             clearStatus(statusElement);
             try {
-                await addPasskeyAsync(apiBase, statusElement);
+                await addPasskeyAsync(apiBase, statusElement, addButton);
                 await loadPasskeysAsync(apiBase, tableBody, statusElement);
             } catch (error) {
                 showStatus(statusElement, (error && error.message) || "Failed to add passkey.", "danger");
@@ -312,7 +348,7 @@
 
         button.addEventListener("click", async function (event) {
             event.preventDefault();
-            await submitLoginCredential(config, false);
+            await submitLoginCredential(config, false, button);
         });
 
         if (!window.PublicKeyCredential || !navigator.credentials || !PublicKeyCredential.isConditionalMediationAvailable) {
@@ -325,7 +361,7 @@
                     return;
                 }
 
-                submitLoginCredential(config, true);
+                submitLoginCredential(config, true, null);
             })
             .catch(function () {
                 // Ignore conditional mediation probing errors.

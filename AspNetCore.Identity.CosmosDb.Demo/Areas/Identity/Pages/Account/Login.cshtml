@@ -9,12 +9,15 @@
 <div class="row">
     <div class="col-md-4">
         <section>
-            <form id="account" method="post">
+            <form id="account"
+                  method="post"
+                  data-passkey-options-url="@Url.Page("./Login", pageHandler: "PasskeyAssertionOptions")"
+                  data-passkey-verify-url="@Url.Page("./Login", pageHandler: "PasskeyLogin")">
                 <h2>Use a local account to log in.</h2>
                 <hr />
                 <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
                 <div class="form-floating mb-3">
-                    <input asp-for="Input.Email" id="Input_Email" class="form-control" autocomplete="username webauthn" aria-required="true" placeholder="name@example.com" />
+                    <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
                     <label asp-for="Input.Email" class="form-label">Email</label>
                     <span asp-validation-for="Input.Email" class="text-danger"></span>
                 </div>
@@ -32,12 +35,8 @@
                 <div>
                     <button id="login-submit" type="submit" class="w-100 btn btn-lg btn-primary">Log in</button>
                 </div>
-                <input asp-for="Input.PasskeyCredentialJson" type="hidden" id="Input_PasskeyCredentialJson" />
-                <input asp-for="Input.PasskeyError" type="hidden" id="Input_PasskeyError" />
-                <hr />
-                <div class="d-flex flex-column">
-                    <span class="text-secondary mx-auto mt-2">OR</span>
-                    <button id="passkey-login-submit" type="button" class="btn btn-link mx-auto">Log in with a passkey</button>
+                <div class="mt-2">
+                    <button id="passkey-login-submit" type="button" class="w-100 btn btn-lg btn-outline-secondary">Log in with passkey</button>
                 </div>
                 <div>
                     <p>
@@ -87,15 +86,5 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-    <script src="/identity/passkeys/client.js"></script>
-    <script>
-        window.AspNetCoreIdentityPasskeys?.initLoginPage({
-            apiBase: "/identity/passkeys",
-            formSelector: "#account",
-            buttonSelector: "#passkey-login-submit",
-            emailSelector: "#Input_Email",
-            credentialFieldSelector: "#Input_PasskeyCredentialJson",
-            errorFieldSelector: "#Input_PasskeyError"
-        });
-    </script>
+    <script src="/js/identity-passkeys.js" asp-append-version="true"></script>
 }

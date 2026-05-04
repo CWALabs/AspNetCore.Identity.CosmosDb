@@ -308,7 +308,7 @@ public async Task<IActionResult> RegisterPasskeyWithBackupCodes(
     string userName, 
     UserPasskeyInfo passkey)
 {
-    var user = await _userManager.FindByNameAsync(userName);
+    var user = await _userManager.FindByNameAsync userName);
     if (user == null)
         return NotFound("User not found");
 
@@ -427,6 +427,38 @@ if (passkey.CredentialId == null)
 }
 ```
 
+### 6. **Prevent Concurrent WebAuthn Requests on Client**
+
+When updating the passkey client script (`identity-passkeys.js`), ensure concurrency protection is maintained:
+
+```javascript
+// Module-level flag
+let passkeyInProgress = false;
+
+// Guard both addPasskeyAsync and submitLoginCredential
+async function yourPasskeyFunction(config) {
+    if (passkeyInProgress) {
+        return;  // Exit early if request already in progress
+    }
+
+    passkeyInProgress = true;
+    try {
+        // Disable UI to prevent duplicate clicks
+        button.disabled = true;
+        
+        // WebAuthn operation...
+        const credential = await navigator.credentials.create(/* ... */);
+        
+        // ... rest of logic ...
+    } finally {
+        passkeyInProgress = false;
+        button.disabled = false;  // Re-enable button
+    }
+}
+```
+
+**Why:** The WebAuthn API only allows one active operation per browser tab. Without concurrency guards, race conditions can occur (e.g., conditional mediation auto-trigger + user button click), causing "A request is already pending" errors.
+
 ---
 
 ## Performance Considerations
@@ -497,6 +529,60 @@ public async Task<IList<UserPasskeyInfo>> GetPasskeysCachedAsync(
 ---
 
 ## Troubleshooting
+
+### Issue: "A request is already pending" WebAuthn error in browser console
+
+**Cause:** Race condition in client-side JavaScript when multiple WebAuthn requests are initiated simultaneously. This commonly occurs when:
+- Conditional mediation (autofill) auto-trigger races with user clicking the "Log in with passkey" button
+- User clicks the "Add Passkey" button multiple times quickly
+- Browser's WebAuthn picker is still open from a previous request
+
+**Error Message:**
+```
+"A request is already pending."
+```
+
+**Solution:** 
+The `identity-passkeys.js` client script includes a module-level `passkeyInProgress` flag that prevents concurrent WebAuthn requests. Ensure your version includes:
+
+1. **Module-level guard flag** (top of identity-passkeys.js):
+```javascript
+let passkeyInProgress = false;
+```
+
+2. **Guard check in addPasskeyAsync**:
+```javascript
+async function addPasskeyAsync(apiBase, statusElement, addButton) {
+    if (passkeyInProgress) {
+        return; // Exit if operation already in progress
+    }
+    passkeyInProgress = true;
+    if (addButton) addButton.disabled = true;
+    try {
+        // ... passkey creation logic ...
+    } finally {
+        passkeyInProgress = false;
+        if (addButton) addButton.disabled = false;
+    }
+}
+```
+
+3. **Guard check in submitLoginCredential**:
+```javascript
+async function submitLoginCredential(config, useConditionalMediation, loginButton) {
+    if (passkeyInProgress) {
+        return; // Exit if operation already in progress
+    }
+    passkeyInProgress = true;
+    // ... rest of implementation ...
+}
+```
+
+4. **UI Feedback:**
+   - Buttons are disabled during WebAuthn prompts
+   - Flag is reset in try/finally to ensure cleanup
+
+This fix ensures only one passkey operation proceeds at a time, eliminating the "request already pending" error.
 
 ### Issue: "ArgumentNullException: user cannot be null"
 
