@@ -24,21 +24,21 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.0.x
-      - name: Validate tag matches repo version
+      - name: Validate tag matches package version
         run: |
           if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
-            repo_version=$(grep -oPm1 '(?<=<RepoVersion>)[^<]+' Directory.Build.props)
-            if [[ -z "$repo_version" ]]; then
-              echo "RepoVersion was not found in Directory.Build.props"
+            package_version=$(grep -oPm1 '(?<=<Version>)[^<]+' AspNetCore.Identity.CosmosDb/AspNetCore.Identity.CosmosDb.csproj)
+            if [[ -z "$package_version" ]]; then
+              echo "Version was not found in AspNetCore.Identity.CosmosDb.csproj"
               exit 1
             fi
 
             tag_version="${GITHUB_REF_NAME#v}"
             tag_core_version="${tag_version%%-*}"
 
-            if [[ "$tag_core_version" != "$repo_version" ]]; then
-              echo "Tag version '$tag_version' does not match RepoVersion '$repo_version'."
-              echo "Expected a tag like 'v$repo_version' or 'v$repo_version-rcN'."
+            if [[ "$tag_core_version" != "$package_version" ]]; then
+              echo "Tag version '$tag_version' does not match package Version '$package_version'."
+              echo "Expected a tag like 'v$package_version' or 'v$package_version-rcN'."
               exit 1
             fi
           fi
@@ -60,6 +60,8 @@ jobs:
             echo "release_tag=" >> "$GITHUB_OUTPUT"
             echo "is_stable_tag=false" >> "$GITHUB_OUTPUT"
           fi
+      - name: Prepare package output folder
+        run: rm -rf ./nupkg && mkdir -p ./nupkg
       - name: Pack main library
         run: dotnet pack AspNetCore.Identity.CosmosDb/AspNetCore.Identity.CosmosDb.csproj -c Release --no-build --no-restore -o ./nupkg
       - name: Pack templates
@@ -73,7 +75,7 @@ jobs:
       - name: Publish demo app template package
         run: dotnet nuget push "${{ github.workspace }}/nupkg/CWALabs.AspNetCore.Identity.CosmosDb.DemoTemplate.*.nupkg" --api-key ${{ secrets.NUGET_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
       - name: Publish NuGet symbols
-        run: dotnet nuget push "${{ github.workspace }}/nupkg/*.snupkg" --api-key ${{ secrets.NUGET_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+        run: dotnet nuget push "${{ github.workspace }}/nupkg/AspNetCore.Identity.CosmosDb.*.snupkg" --api-key ${{ secrets.NUGET_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
       - name: Upload package artifacts
         uses: actions/upload-artifact@v4
         with:
