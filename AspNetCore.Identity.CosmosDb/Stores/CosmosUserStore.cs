@@ -139,6 +139,7 @@ namespace AspNetCore.Identity.CosmosDb.Stores
                 throw new ArgumentNullException(nameof(normalizedEmailName));
 
             var user = await _repo.Table<TUserEntity>()
+                .AsNoTracking()
                 .SingleOrDefaultAsync(_ => _.NormalizedEmail == normalizedEmailName,
                     cancellationToken: cancellationToken);
 
@@ -156,6 +157,7 @@ namespace AspNetCore.Identity.CosmosDb.Stores
                 throw new ArgumentNullException(nameof(userId));
 
             var user = await _repo.Table<TUserEntity>()
+                .AsNoTracking()
                 .WithPartitionKey(userId)
                 .SingleOrDefaultAsync(cancellationToken);
 
@@ -173,6 +175,7 @@ namespace AspNetCore.Identity.CosmosDb.Stores
                 throw new ArgumentNullException(nameof(normalizedUserName));
 
             return await _repo.Table<TUserEntity>()
+                .AsNoTracking()
                 .SingleOrDefaultAsync(_ => _.NormalizedUserName == normalizedUserName || _.NormalizedEmail == normalizedUserName);
         }
 
@@ -482,6 +485,7 @@ namespace AspNetCore.Identity.CosmosDb.Stores
             string providerKey, CancellationToken cancellationToken)
         {
             return await _repo.Table<IdentityUserLogin<TKey>>()
+                .AsNoTracking()
                 .SingleOrDefaultAsync(l =>
                     l.UserId.Equals(userId) &&
                     l.LoginProvider == loginProvider &&
@@ -509,6 +513,7 @@ namespace AspNetCore.Identity.CosmosDb.Stores
         {
             return await _repo
                 .Table<IdentityUserLogin<TKey>>()
+                .AsNoTracking()
                 .Where(l => l.UserId.Equals(userId))
                 .Select(l => new UserLoginInfo(l.LoginProvider, l.ProviderKey, userName)
                 {
@@ -528,8 +533,10 @@ namespace AspNetCore.Identity.CosmosDb.Stores
             if (providerKey == null) throw new ArgumentNullException(nameof(providerKey));
 
             var user =
-                await _repo.Table<IdentityUserLogin<TKey>>().SingleOrDefaultAsync(l =>
-                    l.LoginProvider == loginProvider && l.ProviderKey == providerKey);
+                await _repo.Table<IdentityUserLogin<TKey>>()
+                    .AsNoTracking()
+                    .SingleOrDefaultAsync(l =>
+                        l.LoginProvider == loginProvider && l.ProviderKey == providerKey);
 
 
             return user is null
@@ -640,6 +647,7 @@ namespace AspNetCore.Identity.CosmosDb.Stores
             CancellationToken cancellationToken)
         {
             return await _repo.Table<IdentityUserRole<TKey>>()
+                .AsNoTracking()
                 .SingleOrDefaultAsync(_ => _.RoleId.Equals(roleId) && _.UserId.Equals(userId), cancellationToken);
         }
 
@@ -648,6 +656,7 @@ namespace AspNetCore.Identity.CosmosDb.Stores
         private async Task<TRoleEntity?> FindRoleByNameAsync(string roleName, CancellationToken cancellationToken)
         {
             return await _repo.Table<TRoleEntity>()
+                .AsNoTracking()
                 .FirstOrDefaultAsync(_ => _.NormalizedName == roleName || _.Name == roleName, cancellationToken: cancellationToken);
         }
 
@@ -667,6 +676,7 @@ namespace AspNetCore.Identity.CosmosDb.Stores
                 var userIds = await GetUserIdsByRoleIdAsync(role.Id, cancellationToken);
 
                 var users = await _repo.Table<TUserEntity>()
+                    .AsNoTracking()
                     .Where(m => userIds.Contains(m.Id))
                     .ToListAsync(cancellationToken);
 
@@ -679,6 +689,7 @@ namespace AspNetCore.Identity.CosmosDb.Stores
         private async Task<List<TKey>> GetUserIdsByRoleIdAsync(TKey roleId, CancellationToken cancellationToken)
         {
             return await _repo.Table<IdentityUserRole<TKey>>()
+                .AsNoTracking()
                 .Where(m => m.RoleId.Equals(roleId))
                 .Select(m => m.UserId)
                 .ToListAsync(cancellationToken);
@@ -768,6 +779,7 @@ namespace AspNetCore.Identity.CosmosDb.Stores
             CancellationToken cancellationToken)
         {
             return await _repo.Table<IdentityUserPasskey<TKey>>()
+                .AsNoTracking()
                 .Where(_ => _.UserId.Equals(userId))
                 .ToListAsync(cancellationToken).ConfigureAwait(false);
         }
@@ -801,6 +813,7 @@ namespace AspNetCore.Identity.CosmosDb.Stores
             // Note: The framework's IdentityPasskeyData class does not support custom index fields.
             // Future optimization: Create a custom IdentityPasskeyData subclass with CredentialIdHash for indexed lookups.
             var passkey = (await _repo.Table<IdentityUserPasskey<TKey>>()
+                    .AsNoTracking()
                     .ToListAsync(cancellationToken).ConfigureAwait(false))
                 .SingleOrDefault(_ => _.CredentialId != null && _.CredentialId.SequenceEqual(credentialId));
 
@@ -815,6 +828,7 @@ namespace AspNetCore.Identity.CosmosDb.Stores
         private async Task<TUserEntity?> FindUserByIdInternalAsync(TKey userId, CancellationToken cancellationToken)
         {
             return await _repo.Table<TUserEntity>()
+                .AsNoTracking()
                 .SingleOrDefaultAsync(_ => _.Id.Equals(userId), cancellationToken).ConfigureAwait(false);
         }
 
@@ -1049,7 +1063,7 @@ namespace AspNetCore.Identity.CosmosDb.Stores
         private async Task<List<IdentityUserClaim<TKey>>> GetUserClaimsInternalAsync(TKey userId,
             CancellationToken cancellationToken)
         {
-            return await _repo.Table<IdentityUserClaim<TKey>>().Where(c => c.UserId.Equals(userId))
+            return await _repo.Table<IdentityUserClaim<TKey>>().AsNoTracking().Where(c => c.UserId.Equals(userId))
                 .ToListAsync(cancellationToken);
         }
 
@@ -1131,6 +1145,7 @@ namespace AspNetCore.Identity.CosmosDb.Stores
             CancellationToken cancellationToken)
         {
             return await _repo.Table<IdentityUserClaim<TKey>>()
+                .AsNoTracking()
                 .SingleOrDefaultAsync(c => c.UserId.Equals(userId) &&
                                            c.ClaimValue == claimValue && c.ClaimType == claimType,
                     cancellationToken);
@@ -1142,6 +1157,7 @@ namespace AspNetCore.Identity.CosmosDb.Stores
             var userIds = await GetUserIdsForClaimInternalAsync(claim.Type, claim.Value, cancellationToken);
 
             var users = await _repo.Table<TUserEntity>()
+                .AsNoTracking()
                 .Where(w => userIds.Contains(w.Id)).ToListAsync(cancellationToken);
 
             return (IList<TUserEntity>)users;
@@ -1151,6 +1167,7 @@ namespace AspNetCore.Identity.CosmosDb.Stores
             CancellationToken cancellationToken)
         {
             return await _repo.Table<IdentityUserClaim<TKey>>()
+                .AsNoTracking()
                 .Where(c => c.ClaimType == claimType && c.ClaimValue == claimValue)
                 .Select(s => s.UserId).ToArrayAsync(cancellationToken);
         }
@@ -1271,7 +1288,7 @@ namespace AspNetCore.Identity.CosmosDb.Stores
             string name, CancellationToken cancellationToken)
         {
             var queryable = (IQueryable<IdentityUserToken<TKey>>)_repo.UserTokens;
-            return await queryable.FirstOrDefaultAsync(t =>
+            return await queryable.AsNoTracking().FirstOrDefaultAsync(t =>
                 t.UserId.Equals(userId) && t.LoginProvider == loginProvider && t.Name == name,
                 cancellationToken);
         }

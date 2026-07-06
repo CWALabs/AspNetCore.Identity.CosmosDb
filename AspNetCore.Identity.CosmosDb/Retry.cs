@@ -125,5 +125,52 @@ namespace AspNetCore.Identity.CosmosDb
 
             throw new AggregateException(exceptions);
         }
+
+        /// <summary>
+        /// Executes an async function with exponential backoff retry behavior and returns the result.
+        /// </summary>
+        /// <typeparam name="T">Return type.</typeparam>
+        /// <param name="action">Async function to execute.</param>
+        /// <param name="initialRetryInterval">Initial delay between attempts (exponentially increased).</param>
+        /// <param name="maxAttemptCount">Maximum number of attempts.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Function result.</returns>
+        /// <exception cref="AggregateException"></exception>
+        public static async Task<T> DoAsyncWithExponentialBackoff<T>(
+            Func<Task<T>> action,
+            TimeSpan initialRetryInterval,
+            int maxAttemptCount = 5,
+            CancellationToken cancellationToken = default)
+        {
+            var exceptions = new List<Exception>();
+
+            for (var attempted = 0; attempted < maxAttemptCount; attempted++)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                try
+                {
+                    if (attempted > 0)
+                    {
+                        // Exponential backoff: 2^(attempted-1) * initialRetryInterval
+                        var delay = TimeSpan.FromMilliseconds(
+                            initialRetryInterval.TotalMilliseconds * Math.Pow(2, attempted - 1));
+                        await Task.Delay(delay, cancellationToken);
+                    }
+
+                    return await action();
+                }
+                catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+                {
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    exceptions.Add(ex);
+                }
+            }
+
+            throw new AggregateException(exceptions);
+        }
     }
 }

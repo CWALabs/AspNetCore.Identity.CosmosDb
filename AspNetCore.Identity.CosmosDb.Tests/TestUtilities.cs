@@ -6,12 +6,14 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using System.Collections.Concurrent;
 using System.Reflection;
 
 namespace AspNetCore.Identity.CosmosDb.Tests.Net9
 {
     public class TestUtilities
     {
+        private static readonly ConcurrentDictionary<string, byte> DatabasesMarkedForCleanup = new();
         /// <summary>
         /// Non-normalized email address for user 1
         /// </summary>
@@ -113,10 +115,57 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9
         }
 
         /// <summary>
+        /// Marks a test database for deletion during assembly cleanup.
+        /// </summary>
+        public static void RegisterDatabaseForCleanup(string databaseName)
+        {
+            if (string.IsNullOrWhiteSpace(databaseName))
+            {
+                return;
+            }
+
+            DatabasesMarkedForCleanup.TryAdd(databaseName, 0);
+        }
+
+        /// <summary>
+        /// Deletes all databases that were created/used by tests in this run.
+        /// </summary>
+        public static async Task CleanupRegisteredDatabasesAsync(string connectionString)
+        {
+            if (string.IsNullOrWhiteSpace(connectionString))
+            {
+                return;
+            }
+
+            var cleanupFailures = new List<Exception>();
+
+            foreach (var databaseName in DatabasesMarkedForCleanup.Keys)
+            {
+                try
+                {
+                    using var utilities = new ContainerUtilities(connectionString, databaseName);
+                    await utilities.DeleteDatabaseIfExists(databaseName);
+                    DatabasesMarkedForCleanup.TryRemove(databaseName, out _);
+                }
+                catch (Exception ex)
+                {
+                    cleanupFailures.Add(new InvalidOperationException($"Failed to delete test database '{databaseName}'.", ex));
+                }
+            }
+
+            if (cleanupFailures.Count > 0)
+            {
+                throw new AggregateException("One or more test databases could not be deleted after test execution.", cleanupFailures);
+            }
+        }
+
+        /// <summary>
         /// Ensures the test database and required containers exist.
         /// </summary>
         public async Task EnsureIdentityInfrastructureAsync(string connectionString, string databaseName)
         {
+            RegisterDatabaseForCleanup(databaseName);
+
             using var utilities = GetContainerUtilities(connectionString, databaseName);
             await utilities.CreateDatabaseAsync(databaseName);
             await utilities.CreateRequiredContainers();
