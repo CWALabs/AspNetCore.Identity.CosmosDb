@@ -46,7 +46,15 @@ namespace AspNetCore.Identity.CosmosDb.Containers
         /// <returns></returns>
         public async Task<DatabaseResponse> CreateDatabaseAsync(string databaseName)
         {
-            var result = await _client.CreateDatabaseIfNotExistsAsync(id: databaseName);
+            if (string.IsNullOrEmpty(databaseName))
+                throw new ArgumentNullException(nameof(databaseName));
+
+            // Wrap in retry logic with exponential backoff to handle transient 503 errors
+            // Retry delays: 1s, 2s, 4s, 8s, 16s, 32s, 64s, 128s, 256s (total ~511s or ~8.5 minutes max wait time)
+            var result = await Retry.DoAsyncWithExponentialBackoff(
+                async () => await _client.CreateDatabaseIfNotExistsAsync(id: databaseName),
+                initialRetryInterval: TimeSpan.FromSeconds(1),
+                maxAttemptCount: 10);
             return result;
         }
 
@@ -124,9 +132,15 @@ namespace AspNetCore.Identity.CosmosDb.Containers
             if (!partitionKeyPath.StartsWith('/'))
                 throw new ArgumentException(nameof(partitionKeyPath), "Path must begin with /");
 
-            Container container = await _client.GetDatabase(_databaseName).CreateContainerIfNotExistsAsync(
+            // Wrap in retry logic with exponential backoff to handle transient 503 errors (substatus 1007) 
+            // from Cosmos DB Emulator. This gives the emulator time to recover from resource constraints.
+            // Retry delays: 1s, 2s, 4s, 8s, 16s, 32s, 64s, 128s, 256s (total ~511s or ~8.5 minutes max wait time)
+            Container container = await Retry.DoAsyncWithExponentialBackoff(
+                async () => await _client.GetDatabase(_databaseName).CreateContainerIfNotExistsAsync(
                     id: containerName,
-                    partitionKeyPath: partitionKeyPath, throughput);
+                    partitionKeyPath: partitionKeyPath, throughput),
+                initialRetryInterval: TimeSpan.FromSeconds(1),
+                maxAttemptCount: 10);
             return container;
         }
 

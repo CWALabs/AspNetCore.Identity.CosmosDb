@@ -76,6 +76,7 @@ namespace AspNetCore.Identity.CosmosDb.Repositories
             where TEntity : class, new()
         {
             return await _db.Set<TEntity>()
+                .AsNoTracking()
                 .WithPartitionKey(id)
                 .SingleOrDefaultAsync(cancellationToken);
         }
@@ -90,7 +91,7 @@ namespace AspNetCore.Identity.CosmosDb.Repositories
         public async Task<TEntity?> TryFindOneAsync<TEntity>(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
             where TEntity : class, new()
         {
-            return await _db.Set<TEntity>().SingleOrDefaultAsync(predicate, cancellationToken);
+            return await _db.Set<TEntity>().AsNoTracking().SingleOrDefaultAsync(predicate, cancellationToken);
         }
 
         public IQueryable<TEntity> Find<TEntity>(Expression<Func<TEntity, bool>> predicate)
@@ -108,8 +109,51 @@ namespace AspNetCore.Identity.CosmosDb.Repositories
         public void Update<TEntity>(TEntity entity)
             where TEntity : class, new()
         {
-            var dbEntry = _db.Entry(entity);
-            dbEntry.State = EntityState.Modified;
+            // Get the primary key values for the entity
+            var entry = _db.Entry(entity);
+            var keyValues = entry.Metadata.FindPrimaryKey()?.Properties
+                .Select(p => entry.Property(p.Name).CurrentValue)
+                .ToArray();
+
+            if (keyValues != null && keyValues.Length > 0)
+            {
+                // Check if another instance with the same key is already tracked
+                var localEntity = _db.Set<TEntity>().Local
+                    .FirstOrDefault(e =>
+                    {
+                        var localEntry = _db.Entry(e);
+                        var localKeyValues = entry.Metadata.FindPrimaryKey()?.Properties
+                            .Select(p => localEntry.Property(p.Name).CurrentValue)
+                            .ToArray();
+
+                        if (localKeyValues == null || localKeyValues.Length != keyValues.Length)
+                            return false;
+
+                        // Compare key values, handling byte arrays specially
+                        for (int i = 0; i < keyValues.Length; i++)
+                        {
+                            if (keyValues[i] is byte[] keyBytes && localKeyValues[i] is byte[] localBytes)
+                            {
+                                if (!keyBytes.SequenceEqual(localBytes))
+                                    return false;
+                            }
+                            else if (!Equals(keyValues[i], localKeyValues[i]))
+                            {
+                                return false;
+                            }
+                        }
+
+                        return true;
+                    });
+
+                // If found and it's a different instance, detach it
+                if (localEntity != null && !ReferenceEquals(localEntity, entity))
+                {
+                    _db.Entry(localEntity).State = EntityState.Detached;
+                }
+            }
+
+            entry.State = EntityState.Modified;
         }
 
         [Obsolete("Synchronous Cosmos operations are not recommended. Use DeleteByIdAsync instead.")]
@@ -132,7 +176,65 @@ namespace AspNetCore.Identity.CosmosDb.Repositories
         public void Delete<TEntity>(TEntity entity)
             where TEntity : class, new()
         {
-            _db.Remove(entity);
+            var entry = _db.Entry(entity);
+
+            // If the entity is not tracked, we need to attach it first
+            // But if another instance with the same key is tracked, we need to use that one instead
+            if (entry.State == EntityState.Detached)
+            {
+                var keyValues = entry.Metadata.FindPrimaryKey()!.Properties
+                    .Select(p => entry.Property(p.Name).CurrentValue)
+                    .ToArray();
+
+                // Find if there's already a tracked entity with the same key
+                var trackedEntity = _db.ChangeTracker.Entries<TEntity>()
+                    .FirstOrDefault(e =>
+                    {
+                        var trackedKeyValues = e.Metadata.FindPrimaryKey()!.Properties
+                            .Select(p => e.Property(p.Name).CurrentValue)
+                            .ToArray();
+
+                        // Compare key values, handling byte arrays specially
+                        if (keyValues.Length != trackedKeyValues.Length)
+                            return false;
+
+                        for (int i = 0; i < keyValues.Length; i++)
+                        {
+                            var keyValue = keyValues[i];
+                            var trackedKeyValue = trackedKeyValues[i];
+
+                            // Handle byte array comparison
+                            if (keyValue is byte[] keyBytes && trackedKeyValue is byte[] trackedKeyBytes)
+                            {
+                                if (!keyBytes.SequenceEqual(trackedKeyBytes))
+                                    return false;
+                            }
+                            else if (!Equals(keyValue, trackedKeyValue))
+                            {
+                                return false;
+                            }
+                        }
+
+                        return true;
+                    });
+
+                if (trackedEntity != null)
+                {
+                    // Use the already-tracked entity
+                    _db.Remove(trackedEntity.Entity);
+                }
+                else
+                {
+                    // Attach and delete
+                    _db.Attach(entity);
+                    _db.Remove(entity);
+                }
+            }
+            else
+            {
+                // Entity is already tracked, just mark for deletion
+                _db.Remove(entity);
+            }
         }
 
         [Obsolete("Synchronous Cosmos operations are not recommended. Use DeleteAsync(predicate) instead.")]
@@ -145,8 +247,8 @@ namespace AspNetCore.Identity.CosmosDb.Repositories
         public async Task DeleteAsync<TEntity>(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
             where TEntity : class, new()
         {
-            var entities = await _db.Set<TEntity>().Where(predicate).ToListAsync(cancellationToken);
-            entities.ForEach(entity => _db.Remove(entity));
+            var entities = await _db.Set<TEntity>().AsNoTracking().Where(predicate).ToListAsync(cancellationToken);
+            entities.ForEach(entity => Delete(entity));
         }
 
         public async Task SaveChangesAsync()

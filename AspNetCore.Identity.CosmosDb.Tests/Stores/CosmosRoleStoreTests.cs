@@ -89,6 +89,56 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9.Stores
         }
 
         [TestMethod()]
+        public async Task DetachedRoleEntity_SettersPersistWithoutTrackingTest()
+        {
+            // Arrange
+            using var roleStore = _testUtilities.GetRoleStore(connectionString, databaseName);
+            var role = await GetMockRandomRoleAsync();
+            var detached = await roleStore.FindByIdAsync(role.Id);
+            Assert.IsNotNull(detached);
+
+            var newName = $"WOW{Guid.NewGuid():N}";
+
+            // Act
+            await roleStore.SetRoleNameAsync(detached, newName);
+            await roleStore.SetNormalizedRoleNameAsync(detached, newName.ToUpperInvariant(), default);
+            var result = await roleStore.UpdateAsync(detached);
+
+            // Assert
+            Assert.IsTrue(result.Succeeded);
+
+            var reloaded = await roleStore.FindByIdAsync(role.Id);
+            Assert.AreEqual(newName, reloaded.Name);
+            Assert.AreEqual(newName.ToUpperInvariant(), reloaded.NormalizedName);
+        }
+
+        [TestMethod()]
+        public async Task DetachedRoleEntity_UpdateAsyncRefreshesConcurrencyStampTest()
+        {
+            // Arrange
+            using var roleStore = _testUtilities.GetRoleStore(connectionString, databaseName);
+            var role = await GetMockRandomRoleAsync();
+            var originalConcurrencyStamp = role.ConcurrencyStamp;
+            var detached = await roleStore.FindByIdAsync(role.Id);
+            Assert.IsNotNull(detached);
+            Assert.AreEqual(originalConcurrencyStamp, detached.ConcurrencyStamp);
+
+            var newName = $"WOW{Guid.NewGuid():N}";
+
+            // Act
+            await roleStore.SetRoleNameAsync(detached, newName);
+            await roleStore.SetNormalizedRoleNameAsync(detached, newName.ToUpperInvariant(), default);
+            var result = await roleStore.UpdateAsync(detached);
+
+            // Assert
+            Assert.IsTrue(result.Succeeded);
+            Assert.AreNotEqual(originalConcurrencyStamp, detached.ConcurrencyStamp);
+
+            var reloaded = await roleStore.FindByIdAsync(role.Id);
+            Assert.AreEqual(detached.ConcurrencyStamp, reloaded.ConcurrencyStamp);
+        }
+
+        [TestMethod()]
         public async Task FindByNameAsyncTest()
         {
             // Arrange

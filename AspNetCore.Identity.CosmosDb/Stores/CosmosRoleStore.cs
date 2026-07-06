@@ -81,13 +81,13 @@ namespace AspNetCore.Identity.CosmosDb.Stores
 
             try
             {
-                var userRoles = await UserRoles.Where(w => w.RoleId.Equals(role.Id)).ToListAsync(cancellationToken);
+                var userRoles = await UserRoles.AsNoTracking().Where(w => w.RoleId.Equals(role.Id)).ToListAsync(cancellationToken);
                 foreach (var userRole in userRoles)
                 {
                     _repo.Delete(userRole);
                 }
 
-                var roleClaims = await RoleClaims.Where(w => w.RoleId.Equals(role.Id)).ToListAsync(cancellationToken);
+                var roleClaims = await RoleClaims.AsNoTracking().Where(w => w.RoleId.Equals(role.Id)).ToListAsync(cancellationToken);
                 foreach (var roleClaim in roleClaims)
                 {
                     _repo.Delete(roleClaim);
@@ -115,6 +115,7 @@ namespace AspNetCore.Identity.CosmosDb.Stores
 
             var typedId = (TKey)TypeDescriptor.GetConverter(typeof(TKey)).ConvertFromInvariantString(roleId)!;
             var role = await _repo.Table<TRoleEntity>()
+                .AsNoTracking()
                 .SingleOrDefaultAsync(_ => _.Id.Equals(typedId), cancellationToken: cancellationToken);
 
             return role;
@@ -131,6 +132,7 @@ namespace AspNetCore.Identity.CosmosDb.Stores
                 throw new ArgumentNullException(nameof(normalizedName));
 
             var role = await _repo.Table<TRoleEntity>()
+                .AsNoTracking()
                 .FirstOrDefaultAsync(_ => _.NormalizedName == normalizedName, cancellationToken: cancellationToken);
 
             return role;
@@ -218,8 +220,6 @@ namespace AspNetCore.Identity.CosmosDb.Stores
 
             ArgumentNullException.ThrowIfNull(role);
 
-            role.ConcurrencyStamp = Guid.NewGuid().ToString();
-
             try
             {
                 _repo.Update(role);
@@ -270,7 +270,7 @@ namespace AspNetCore.Identity.CosmosDb.Stores
         private async Task<List<IdentityRoleClaim<TKey>>> GetRoleClaimsInternalAsync(TKey roleId,
             CancellationToken cancellationToken)
         {
-            return await _repo.Table<IdentityRoleClaim<TKey>>().Where(c => c.RoleId.Equals(roleId))
+            return await _repo.Table<IdentityRoleClaim<TKey>>().AsNoTracking().Where(c => c.RoleId.Equals(roleId))
                 .ToListAsync(cancellationToken);
         }
 
@@ -325,6 +325,7 @@ namespace AspNetCore.Identity.CosmosDb.Stores
             CancellationToken cancellationToken)
         {
             return await _repo.Table<IdentityRoleClaim<TKey>>()
+                .AsNoTracking()
                 .FirstOrDefaultAsync(c => c.RoleId.Equals(roleId) &&
                                           c.ClaimValue == claimValue && c.ClaimType == claimType, cancellationToken);
         }

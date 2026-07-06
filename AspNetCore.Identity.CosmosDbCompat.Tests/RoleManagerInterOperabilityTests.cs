@@ -6,6 +6,7 @@ using System.Security.Claims;
 namespace AspNetCore.Identity.CosmosDb.Tests.Net7
 {
     [TestClass()]
+    [DoNotParallelize] // Prevent parallel execution to avoid overwhelming Cosmos DB Emulator with concurrent database/container operations
     public class RoleManagerInterOperabilityTests : CosmosIdentityTestsBase
     {
         private static string connectionString = null!;
@@ -225,7 +226,6 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net7
         [TestMethod]
         public async Task SetRoleNameAsyncTest()
         {
-
             // Assert
             using var roleManager = GetTestRoleManager(_testUtilities.GetRoleStore(connectionString, databaseName));
             var role = await GetTestRole(roleManager);
@@ -233,12 +233,13 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net7
 
             // Act
             var result = await roleManager.SetRoleNameAsync(role, name);
+            var persist = await roleManager.UpdateAsync(role);
 
             // Assert
             Assert.IsTrue(result.Succeeded);
+            Assert.IsTrue(persist.Succeeded);
             var result2 = await roleManager.FindByIdAsync(role.Id);
             Assert.AreEqual(name, result2!.Name);
-
         }
 
         [TestMethod]
@@ -264,13 +265,13 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net7
             var name = Guid.NewGuid().ToString();
             var result = await roleManager.SetRoleNameAsync(role, name);
             Assert.IsTrue(result.Succeeded);
-            var result2 = await roleManager.FindByIdAsync(role.Id);
-            Assert.AreEqual(name, result2!.Name);
 
             // Act
             await roleManager.UpdateNormalizedRoleNameAsync(role);
+            var persist = await roleManager.UpdateAsync(role);
 
             // Assert
+            Assert.IsTrue(persist.Succeeded);
             var result3 = await roleManager.FindByIdAsync(role.Id);
             Assert.AreEqual(name.ToUpperInvariant(), result3!.NormalizedName);
         }

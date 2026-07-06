@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using AspNetCore.Identity.CosmosDb.Extensions;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
@@ -233,26 +234,13 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9
 
             // Act
             var result = await roleManager.SetRoleNameAsync(role, name);
+            var persist = await roleManager.UpdateAsync(role);
 
             // Assert
             Assert.IsTrue(result.Succeeded);
+            Assert.IsTrue(persist.Succeeded);
             var result2 = await roleManager.FindByIdAsync(role.Id);
             Assert.AreEqual(name, result2.Name);
-
-        }
-
-        [TestMethod]
-        public async Task UpdateAsyncTest()
-        {
-
-            // Assert
-            using var roleManager = GetTestRoleManager(_testUtilities.GetRoleStore(connectionString, databaseName));
-            var role = await GetTestRole(roleManager);
-
-            // Act
-
-            // Assert
-
         }
 
         [TestMethod]
@@ -264,13 +252,13 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9
             var name = Guid.NewGuid().ToString();
             var result = await roleManager.SetRoleNameAsync(role, name);
             Assert.IsTrue(result.Succeeded);
-            var result2 = await roleManager.FindByIdAsync(role.Id);
-            Assert.AreEqual(name, result2.Name);
 
             // Act
             await roleManager.UpdateNormalizedRoleNameAsync(role);
+            var persist = await roleManager.UpdateAsync(role);
 
             // Assert
+            Assert.IsTrue(persist.Succeeded);
             var result3 = await roleManager.FindByIdAsync(role.Id);
             Assert.AreEqual(name.ToUpperInvariant(), result3.NormalizedName);
         }

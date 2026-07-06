@@ -128,6 +128,30 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9.Stores
         }
 
         [TestMethod()]
+        public async Task DetachedUserEntity_SettersPersistWithoutTrackingTest()
+        {
+            // Arrange
+            using var userStore = _testUtilities.GetUserStore(connectionString, databaseName);
+            var user = await GetMockRandomUserAsync(userStore);
+            var detached = await userStore.FindByIdAsync(user.Id);
+            Assert.IsNotNull(detached);
+
+            var updatedPhoneNumber = "1234567890";
+
+            // Act
+            await userStore.SetPhoneNumberAsync(detached, updatedPhoneNumber);
+            await userStore.SetPhoneNumberConfirmedAsync(detached, true);
+            var result = await userStore.UpdateAsync(detached);
+
+            // Assert
+            Assert.IsTrue(result.Succeeded);
+
+            var reloaded = await userStore.FindByIdAsync(user.Id);
+            Assert.AreEqual(updatedPhoneNumber, reloaded.PhoneNumber);
+            Assert.IsTrue(reloaded.PhoneNumberConfirmed);
+        }
+
+        [TestMethod()]
         public async Task FindByNameAsyncTest()
         {
             // Arrange
@@ -265,14 +289,14 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9.Stores
             var user = await GetMockRandomUserAsync(userStore);
             var phoneNumber = "1234567899";
             await userStore.SetPhoneNumberAsync(user, phoneNumber);
-            //user = await userStore.FindByIdAsync(user.Id);
+            await userStore.UpdateAsync(user);
 
             // Act
             user = await userStore.FindByIdAsync(user.Id);
             var result2 = await userStore.GetPhoneNumberAsync(user);
 
             // Assert
-            Assert.AreSame(phoneNumber, result2);
+            Assert.AreEqual(phoneNumber, result2);
         }
 
         [TestMethod()]
@@ -351,6 +375,7 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9.Stores
 
             // Act
             await userStore.SetEmailAsync(user, TestUtilities.IDENUSER2EMAIL);
+            await userStore.UpdateAsync(user);
 
             // Assert
             var user2 = await userStore.FindByIdAsync(user.Id);
@@ -371,6 +396,7 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9.Stores
 
             // Act
             await userStore.SetEmailConfirmedAsync(user, true);
+            await userStore.UpdateAsync(user);
 
             // Assert
             var result = await userStore.GetEmailConfirmedAsync(user);
@@ -390,6 +416,7 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9.Stores
 
             // Act
             await userStore.SetNormalizedEmailAsync(user, newEmail.ToUpper());
+            await userStore.UpdateAsync(user);
 
             // Assert
             user = await userStore.FindByIdAsync(user.Id);
@@ -407,6 +434,7 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9.Stores
 
             // Act
             await userStore.SetNormalizedUserNameAsync(user, newEmail.ToUpper());
+            await userStore.UpdateAsync(user);
 
             // Assert
             var user2 = await userStore.FindByIdAsync(user.Id);
@@ -440,6 +468,7 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9.Stores
 
             // Act
             await userStore.SetPhoneNumberAsync(user, phoneNumber);
+            await userStore.UpdateAsync(user);
 
             // Assert
             var user2 = await userStore.FindByIdAsync(user.Id);
@@ -456,6 +485,7 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9.Stores
 
             // Act
             await userStore.SetPhoneNumberConfirmedAsync(user, true);
+            await userStore.UpdateAsync(user);
 
             // Assert
             var result = await userStore.GetPhoneNumberConfirmedAsync(user);
@@ -474,6 +504,7 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9.Stores
 
             // Act
             await userStore.SetUserNameAsync(user, newUserName);
+            await userStore.UpdateAsync(user);
 
             // Assert
             user = await userStore.FindByIdAsync(user.Id);
@@ -778,6 +809,15 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9.Stores
 
             var reloaded = await repository.Find<IdentityUser>(_ => _.Id == userId).ToListAsync();
             Assert.AreEqual("1111111111", reloaded[0].PhoneNumber);
+
+            var detached = await repository.GetByIdAsync<IdentityUser>(userId);
+            Assert.IsNotNull(detached);
+            detached.PhoneNumber = "2222222222";
+            repository.Update(detached);
+            await repository.SaveChangesAsync();
+
+            var reloadedDetached = await repository.GetByIdAsync<IdentityUser>(userId);
+            Assert.AreEqual("2222222222", reloadedDetached.PhoneNumber);
 
             await repository.DeleteAsync<IdentityUser>(_ => _.Id == userId);
             await repository.SaveChangesAsync();

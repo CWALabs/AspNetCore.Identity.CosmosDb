@@ -162,8 +162,10 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9
 
             // Act
             await userManager.UpdateNormalizedUserNameAsync(user);
+            var persist = await userManager.UpdateAsync(user);
 
             // Assert
+            Assert.IsTrue(persist.Succeeded);
             user = await userManager.FindByIdAsync(user.Id);
             Assert.IsTrue(user.NormalizedUserName == userName.ToUpperInvariant());
         }
@@ -753,8 +755,10 @@ namespace AspNetCore.Identity.CosmosDb.Tests.Net9
 
             // Act
             await userManager.UpdateNormalizedEmailAsync(user);
+            var persist = await userManager.UpdateAsync(user);
 
             // Assert
+            Assert.IsTrue(persist.Succeeded);
             var user2 = await userManager.FindByIdAsync(user.Id);
             Assert.AreEqual(emailAddress.ToUpperInvariant(), user2.NormalizedEmail);
         }
