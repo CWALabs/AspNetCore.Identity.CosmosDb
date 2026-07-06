@@ -9,11 +9,11 @@
 
 		<UserSecretsId>e5f1f76e-e6ac-4f45-ac55-02e401325c2b</UserSecretsId>
 
-		<Version>12.0.3</Version>
+		<Version>12.0.4</Version>
 
-		<FileVersion>12.0.3</FileVersion>
+		<FileVersion>12.0.4</FileVersion>
 
-		<AssemblyVersion>12.0.3</AssemblyVersion>
+		<AssemblyVersion>12.0.4</AssemblyVersion>
 	</PropertyGroup>
 
 	<ItemGroup>

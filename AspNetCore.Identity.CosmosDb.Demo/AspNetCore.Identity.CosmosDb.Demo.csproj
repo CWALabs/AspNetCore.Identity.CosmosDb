@@ -7,9 +7,9 @@
     <LangVersion>latest</LangVersion>
     <UserSecretsId>fcd6dee2-77c7-42d2-8d8e-a182dc883e7d</UserSecretsId>
     <IsPackable>false</IsPackable>
-    <Version>12.0.3</Version>
-    <FileVersion>12.0.3</FileVersion>
-    <AssemblyVersion>12.0.3</AssemblyVersion>
+    <Version>12.0.4</Version>
+    <FileVersion>12.0.4</FileVersion>
+    <AssemblyVersion>12.0.4</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
